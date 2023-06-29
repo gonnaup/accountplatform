@@ -1,9 +1,14 @@
 server:
   port: 10000
 spring:
+  application:
+    name: account_platform
   datasource:
     username: gonnaup
     password: 123456
-    url: jdbc:mysql://linuxserver.cn/gonnaup?useSSL=false
+    url: jdbc:mysql://gonnaup.cn/accountplatform?useSSL=false
     hikari:
       maximum-pool-size: 2
+  jpa:
+    hibernate:
+      ddl-auto: update
