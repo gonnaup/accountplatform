@@ -137,7 +137,9 @@ class IdentifyStepServiceTest {
     @Transactional
     void nextStep() {
         IdentifyStep identifyStep = insertRandomStep();
-        identifyStepService.nextStep(identifyStep.getId());
+        for (int i = 0; i < 5; i++) {
+            identifyStepService.nextStep(identifyStep.getId());
+        }
         assertEquals(identifyStep.getIdentifyBegin() + identifyStep.getIdentifyInterval() * 5L, identifyStepService.findById(identifyStep.getId()).getIdentifyBegin());
     }
 

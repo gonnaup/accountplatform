@@ -20,11 +20,12 @@ public interface IdentifyStepRepository extends JpaRepository<IdentifyStep, Inte
 
     /**
      * 更新数据到下一段
+     * <a href="https://codingexplained.com/coding/java/spring-framework/updating-entities-with-update-query-spring-data-jpa">巨坑，各种测试耗时超半天</a>
      *
      * @param stepId
      * @return
      */
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("update IdentifyStep t set t.identifyBegin = t.identifyBegin + t.identifyInterval where t.id = ?1")
     int toNextIdentifyStep(Integer stepId);
 
