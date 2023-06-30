@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author gonnaup
@@ -25,50 +25,47 @@ public class IdentifyGenerateServiceImpl implements IdentifyGenerateService {
 
     private final IdentifyStepService identifyStepService;
 
-    private final ConcurrentHashMap<Integer, IdentifyGenerator> generatorStore = new ConcurrentHashMap<>(2);
+    private final Map<Integer, IdentifyGenerator> generatorStore = new HashMap<>();
 
 
     public IdentifyGenerateServiceImpl(IdentifyStepService identifyStepService) {
         this.identifyStepService = identifyStepService;
     }
 
+    /**
+     * 生成 Long 类型ID
+     *
+     * @param stepId 段对象ID
+     * @return
+     */
     @Override
-    public Long generateLongIdentify(Integer stepId) {
+    public synchronized Long generateLongIdentify(Integer stepId) {
         IdentifyGenerator generator = generatorStore.get(stepId);
         if (generator == null) {
-            // 此处并发问题在于可能后现场覆盖前面的段数据，可能丢失一段ID，无实际影响
             generator = IdentifyGenerator.of(identifyStepService.nextStep(stepId));
             generatorStore.put(stepId, generator);
         }
 
-        long id = generator.generator.getAndIncrement();
+        long id = generator.getAndIncrement();
         //判断当前值是否超过最大值
         while (id >= generator.maxVal) {
-            //在高并发下，由于此处请求数据库较慢，将导致generator重复更新而丢失多段ID
             generator = IdentifyGenerator.of(identifyStepService.nextStep(stepId));
             generatorStore.put(stepId, generator);
-            id = generator.generator.getAndIncrement();
+            id = generator.getAndIncrement();
         }
         return id;
     }
 
+    /**
+     * 生成 Integer 类型ID
+     *
+     * @param stepId 段对象ID
+     * @return
+     */
     @Override
     public Integer generateIntegerIdentify(Integer stepId) {
-        IdentifyGenerator generator = generatorStore.get(stepId);
-        if (generator == null) {
-            // 此处并发问题在于可能后现场覆盖前面的段数据，可能丢失一段ID，无实际影响
-            generator = IdentifyGenerator.of(identifyStepService.nextStep(stepId));
-            generatorStore.put(stepId, generator);
-        }
-
-        long id = generator.generator.getAndIncrement();
-        //判断当前值是否超过最大值
-        while (id >= generator.maxVal) {
-            //在高并发下，由于此处请求数据库较慢，将导致generator重复更新而丢失多段ID
-            generator = IdentifyGenerator.of(identifyStepService.nextStep(stepId));
-            id = generator.generator.getAndIncrement();
-        }
-        return (int) id;
+        Long id = this.generateLongIdentify(stepId);
+        return id.intValue();
     }
 
     /**
@@ -104,17 +101,20 @@ public class IdentifyGenerateServiceImpl implements IdentifyGenerateService {
 
     private static class IdentifyGenerator {
 
-        private AtomicLong generator;
+        private long generator;
 
-        private Long maxVal;
+        private long maxVal;
 
         static IdentifyGenerator of(IdentifyStep identifyStep) {
             IdentifyGenerator g = new IdentifyGenerator();
-            g.generator = new AtomicLong(identifyStep.getIdentifyBegin());
+            g.generator = identifyStep.getIdentifyBegin();
             g.maxVal = identifyStep.getIdentifyBegin() + identifyStep.getIdentifyInterval();
             return g;
         }
 
+        long getAndIncrement() {
+            return generator++;
+        }
 
     }
 

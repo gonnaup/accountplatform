@@ -7,7 +7,7 @@
         </layout>
     </appender>
 
-    <logger name="org.gonnaup.accountplatform" level="debug"/>
+    <logger name="org.gonnaup.accountplatform" level="info"/>
     <logger name="org.springframework.orm.jpa" level="info"/>
 
     <root level="info">
