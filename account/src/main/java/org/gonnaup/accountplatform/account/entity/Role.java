@@ -20,7 +20,12 @@ public class Role {
     @Column(name = "role_name", length = 100, nullable = false)
     private String roleName;
 
+    @Column(name = "role_name", length = 200, nullable = false)
+    private String roleLocalName;
+
     /**
+     * 权限编码，需根据<code>permissions</code>计算得出
+     *
      * @see Permission#permissionCode
      */
     @Column(name = "permission_code", length = 500)
@@ -73,5 +78,13 @@ public class Role {
 
     public void setPermissions(List<Permission> permissions) {
         this.permissions = permissions;
+    }
+
+    public String getRoleLocalName() {
+        return roleLocalName;
+    }
+
+    public void setRoleLocalName(String roleLocalName) {
+        this.roleLocalName = roleLocalName;
     }
 }
