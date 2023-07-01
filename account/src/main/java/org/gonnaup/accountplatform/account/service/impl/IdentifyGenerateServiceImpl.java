@@ -76,9 +76,10 @@ public class IdentifyGenerateServiceImpl implements IdentifyGenerateService {
     public void initApplicationIdentifyStep() {
         logger.info("开始初始化ID段 IdentifyStep 数据...");
         Optional<IdentifyStep> accountStepOptional = Optional.ofNullable(identifyStepService.findById(IdentifyGenerateService.ACCOUNT_STEP_ID));
+        LocalDateTime timeNow = LocalDateTime.now();
         if (accountStepOptional.isEmpty()) {
             IdentifyStep accountStep = new IdentifyStep(IdentifyGenerateService.ACCOUNT_STEP_ID, IdentifyGenerateService.ACCOUNT_STEP_NAME
-                    , 10000L, 100, "帐号相关ID段", LocalDateTime.now());
+                    , 10000L, 100, "帐号相关ID段", timeNow, timeNow);
             identifyStepService.addIdentifyStep(accountStep);
             logger.info("添加帐号ID段 => {}", accountStep);
         } else {
@@ -89,7 +90,7 @@ public class IdentifyGenerateServiceImpl implements IdentifyGenerateService {
         Optional<IdentifyStep> authStepOptional = Optional.ofNullable(identifyStepService.findById(IdentifyGenerateService.AUTH_STEP_ID));
         if (authStepOptional.isEmpty()) {
             IdentifyStep authStep = new IdentifyStep(IdentifyGenerateService.AUTH_STEP_ID, IdentifyGenerateService.AUTH_STEP_NAME
-                    , 10000L, 100, "认证相关ID段", LocalDateTime.now());
+                    , 10000L, 100, "认证相关ID段", timeNow, timeNow);
             identifyStepService.addIdentifyStep(authStep);
             logger.info("添加认证ID段 => {}", authStep);
         } else {

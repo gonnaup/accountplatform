@@ -75,8 +75,12 @@ public class IdentifyStepServiceImpl implements IdentifyStepService {
         idStepStored.setIdentifyName(identifyStep.getIdentifyName());
         idStepStored.setIdentifyInterval(identifyStep.getIdentifyInterval());
         idStepStored.setDescription(identifyStep.getDescription());
+
+        //更新时间
+        idStepStored.setUpdateTime(LocalDateTime.now());
+
         identifyStepRepository.save(idStepStored);
-        logger.info("更新 ID = {} 的ID段", identifyStep.getId());
+        logger.info("更新 ID = {} 的ID段成功", identifyStep.getId());
         return idStepStored;
     }
 

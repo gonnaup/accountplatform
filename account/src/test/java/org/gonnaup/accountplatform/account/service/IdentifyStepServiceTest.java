@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -42,7 +41,7 @@ class IdentifyStepServiceTest {
         IdentifyStep identifyStep;
         do {
             identifyStep = new IdentifyStep(new Random().nextInt(100000, Integer.MAX_VALUE), UUID.randomUUID().toString(),
-                    10000L, 100, "", LocalDateTime.now());
+                    10000L, 100, "", LocalDateTime.now(), LocalDateTime.now());
         } while (identifyStepService.idExists(identifyStep.getId()));
         identifyStepService.addIdentifyStep(identifyStep);
         logger.info("添加测试ID段数据 {}", identifyStep);
@@ -54,7 +53,7 @@ class IdentifyStepServiceTest {
         do {
 
             identifyStep = new IdentifyStep(new Random().nextInt(100000, Integer.MAX_VALUE), UUID.randomUUID().toString(),
-                    10000L, 100, "", LocalDateTime.now());
+                    10000L, 100, "", LocalDateTime.now(), LocalDateTime.now());
         } while (identifyStepService.idExists(identifyStep.getId()));
         return identifyStep;
     }

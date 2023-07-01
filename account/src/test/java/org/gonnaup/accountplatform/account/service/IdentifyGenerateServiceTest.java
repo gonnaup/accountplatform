@@ -29,7 +29,7 @@ class IdentifyGenerateServiceTest {
         IdentifyStep identifyStep;
         do {
             identifyStep = new IdentifyStep(new Random().nextInt(100000, Integer.MAX_VALUE), UUID.randomUUID().toString(),
-                    10000L, step, "", LocalDateTime.now());
+                    10000L, step, "", LocalDateTime.now(), LocalDateTime.now());
         } while (identifyStepService.idExists(identifyStep.getId()));
         identifyStepService.addIdentifyStep(identifyStep);
         logger.info("添加测试ID段数据 {}", identifyStep);

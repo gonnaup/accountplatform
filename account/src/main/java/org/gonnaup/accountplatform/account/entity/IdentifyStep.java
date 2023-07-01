@@ -51,13 +51,15 @@ public class IdentifyStep extends TimedEntity {
     public IdentifyStep() {
     }
 
-    public IdentifyStep(Integer id, String identifyName, Long identifyBegin, Integer identifyInterval, String description, LocalDateTime createTime) {
+    public IdentifyStep(Integer id, String identifyName, Long identifyBegin, Integer identifyInterval, String description,
+                        LocalDateTime createTime, LocalDateTime updateTime) {
         this.id = id;
         this.identifyName = identifyName;
         this.identifyBegin = identifyBegin;
         this.identifyInterval = identifyInterval;
         this.description = description;
         this.createTime = createTime;
+        this.updateTime = updateTime;
     }
 
     @Override
