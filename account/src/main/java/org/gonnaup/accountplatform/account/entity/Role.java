@@ -1,9 +1,9 @@
 package org.gonnaup.accountplatform.account.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-
-import java.util.List;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * 角色
@@ -33,11 +33,6 @@ public class Role {
 
     @Column(length = 500)
     private String description;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "t_role_permission", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    @JsonIgnore
-    private List<Permission> permissions;
 
 
     public Integer getId() {
@@ -70,14 +65,6 @@ public class Role {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public List<Permission> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(List<Permission> permissions) {
-        this.permissions = permissions;
     }
 
     public String getRoleLocalName() {

@@ -42,7 +42,7 @@ public class Permission {
     /**
      * 权限位，位运算法权限验证时使用
      */
-    @Column(name = "permission_location")
+    @Column(name = "permission_location", nullable = false)
     private Integer permissionLocation;
 
     /**
@@ -59,7 +59,7 @@ public class Permission {
      * <p>
      * 使用16进制数表示
      */
-    @Column(name = "permission_code", length = 500)
+    @Column(name = "permission_code", length = 500, nullable = false)
     private String permissionCode;
 
 

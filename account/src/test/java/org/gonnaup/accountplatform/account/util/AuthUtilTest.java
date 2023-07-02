@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * @author gonnaup
  * @version created at 2023/7/2 上午10:04
  */
-@Deprecated
 class AuthUtilTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthUtilTest.class);
