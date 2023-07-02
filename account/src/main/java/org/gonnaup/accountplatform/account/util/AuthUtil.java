@@ -9,7 +9,10 @@ import java.util.List;
 
 /**
  * 认证和授权习惯工具类
+ * <p>
  * 权限码在位运算设计中由多个长整形拼接而成，此种权限码称为权限链
+ * <p>
+ * 权限位指在某个bit位有权限
  *
  * @author gonnaup
  * @version created at 2023/7/1 上午9:15
@@ -64,6 +67,12 @@ public class AuthUtil {
         }
     }
 
+    /**
+     * 根据权限位列表生成权限链
+     *
+     * @param permissionLocations
+     * @return
+     */
     public static String generatePermissionChain(List<Integer> permissionLocations) {
         if (permissionLocations.isEmpty()) {
             logger.error("多个权限位生成权限链时，权限位列表不能为空");
@@ -76,6 +85,12 @@ public class AuthUtil {
     }
 
 
+    /**
+     * 合并权限链列表
+     *
+     * @param permissionChains
+     * @return
+     */
     public static String mergePermissionChainList(List<String> permissionChains) {
         if (permissionChains.isEmpty()) {
             logger.error("进行权限链列表合并时，列表不能为空");
@@ -94,15 +109,22 @@ public class AuthUtil {
      * @param grantedPermissionChains 新授予的权限链
      * @return 授权后的权限链
      */
-    public static String grantPermissions(String ownPermissionChain, List<String> grantedPermissionChains) {
+    public static String grantPermission(String ownPermissionChain, List<String> grantedPermissionChains) {
         if (grantedPermissionChains.isEmpty()) {
             return ownPermissionChain;
+        }
+        if (grantedPermissionChains.size() == 1) {
+            return mergePermissonChain(ownPermissionChain, grantedPermissionChains.get(0));
         }
         return mergePermissonChain(ownPermissionChain, mergePermissionChainList(grantedPermissionChains));
     }
 
+    public static String grantPermission(String ownPermissionChain, String grantedPermissionChain) {
+        return grantPermission(ownPermissionChain, List.of(grantedPermissionChain));
+    }
+
     /**
-     * 判断权限链是否有权限链列表中的所有权限
+     * 判断权限链是否有目标权限链中的所有权限
      *
      * @param ownPermissionChain    拥有的权限链
      * @param targetPermissionChain 目标权限链
@@ -133,6 +155,13 @@ public class AuthUtil {
         return true;
     }
 
+    /**
+     * 判断权限链是否有权限链列表中所有权限
+     *
+     * @param ownPermissionChain
+     * @param targetPermissionChainList
+     * @return
+     */
     public static boolean hasPermission(String ownPermissionChain, List<String> targetPermissionChainList) {
         return hasPermission(ownPermissionChain, mergePermissionChainList(targetPermissionChainList));
     }
@@ -154,6 +183,12 @@ public class AuthUtil {
         return Arrays.stream(pm).map(AuthUtil::parsePermissionCodeToLong).map(Long::toBinaryString).reduce((p1, p2) -> String.join(PERMISSION_CHAIN_SPLITER, p1, p2)).orElse("0");
     }
 
+    /**
+     * 根据权限链生成权限链所有权限位
+     *
+     * @param permissionChain
+     * @return
+     */
     public static List<Integer> parsePermissionChainToPermissionLocationList(String permissionChain) {
         String[] pm = permissionChain.split(PERMISSION_CHAIN_SPLITER);
         int len = pm.length;
