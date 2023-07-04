@@ -74,5 +74,12 @@ public interface PermissionService {
      */
     GenericPage<Permission> findPermissionPaged(Permission example, Pageable pageable);
 
+    /**
+     * 获取权限码
+     *
+     * @param permissionId 权限Id
+     * @return 权限码
+     */
+    String findPermissionCode(Integer permissionId);
 
 }

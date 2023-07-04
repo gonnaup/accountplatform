@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "t_role")
-public class Role {
+public class Role extends TimedEntity {
     @Id
     private Integer id;
 

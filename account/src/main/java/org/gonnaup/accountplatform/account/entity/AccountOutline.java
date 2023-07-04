@@ -1,9 +1,8 @@
 package org.gonnaup.accountplatform.account.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-
-import java.util.List;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * 帐号概要信息
@@ -13,16 +12,16 @@ import java.util.List;
  */
 @Entity
 @Table(name = "t_account_outline")
-public class AccountOutline {
+public class AccountOutline extends TimedEntity {
     @Id
-    @GeneratedValue(generator = "")
     private Long id;
 
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "t_accountoutline_role", joinColumns = @JoinColumn(name = "accountoutline_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-    @JsonIgnore
-    private List<Role> roles;
+    public Long getId() {
+        return id;
+    }
 
-
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

@@ -14,7 +14,7 @@ import java.util.StringJoiner;
  */
 @Entity
 @Table(name = "t_permission")
-public class Permission {
+public class Permission extends TimedEntity {
 
     @Id
     private Integer id;

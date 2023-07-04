@@ -55,4 +55,12 @@ public interface RoleService {
      * @return 分页数据
      */
     GenericPage<Role> findRoleListPaged(Role example, Pageable pageable);
+
+    /**
+     * 获取角色的权限码
+     *
+     * @param roleId 角色Id
+     * @return
+     */
+    String findRolePermissionCode(Integer roleId);
 }

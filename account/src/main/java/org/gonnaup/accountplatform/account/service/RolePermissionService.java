@@ -3,6 +3,7 @@ package org.gonnaup.accountplatform.account.service;
 import org.gonnaup.accountplatform.account.entity.Permission;
 import org.gonnaup.accountplatform.account.entity.Role;
 import org.gonnaup.accountplatform.account.entity.RolePermission;
+import org.gonnaup.accountplatform.account.entity.RolePermissionPk;
 
 import java.util.List;
 
@@ -15,39 +16,40 @@ import java.util.List;
 public interface RolePermissionService {
 
     /**
-     * 添加关联对象
+     * 添加关联对象，如果有权限缓存，需删除关联缓存
      *
-     * @param rolePermission
+     * @param roleId       角色ID
+     * @param permissionId 权限ID
      * @return 添加的对象
      */
-    RolePermission addRolePermission(RolePermission rolePermission);
+    RolePermission addRolePermission(RolePermissionPk rolePermissionPk);
 
     /**
-     * 批量添加角色权限关联对象
+     * 批量添加角色权限关联对象，如果有权限缓存，需删除关联缓存
      *
-     * @param rolePermissionList 关联列表
+     * @param rolePermissionPkList roleId-permissionId列表
      * @return 添加的数量
      */
-    int addRolePermissionList(List<RolePermission> rolePermissionList);
+    int addRolePermissionList(List<RolePermissionPk> rolePermissionPkList);
 
     /**
-     * 根据联合主键删除一个关联对象
+     * 根据联合主键删除一个关联对象，如果有权限缓存，需删除关联缓存
      *
      * @param rolePermissionPk 主键
      * @return 删除对象个数
      */
-    int deleteByPrimaryKey(RolePermission.RolePermissionPk rolePermissionPk);
+    int deleteByPrimaryKey(RolePermissionPk rolePermissionPk);
 
     /**
-     * 批量删除关联对象
+     * 批量删除关联对象，如果有权限缓存，需删除关联缓存
      *
      * @param rolePermissionPkList 关联对象主键列表
      * @return 删除的数量
      */
-    int deleteByPrimaryKeyList(List<RolePermission.RolePermissionPk> rolePermissionPkList);
+    int deleteByPrimaryKeyList(List<RolePermissionPk> rolePermissionPkList);
 
     /**
-     * 根据角色ID删除关联关系
+     * 根据角色ID删除关联关系，如果有权限缓存，需删除关联缓存
      *
      * @param roleId 角色ID
      * @return 删除对象的个数
@@ -55,7 +57,7 @@ public interface RolePermissionService {
     int deleteByRoleId(Integer roleId);
 
     /**
-     * 删除和某权限的所有角色关联关系
+     * 删除和某权限的所有角色关联关系，如果有权限缓存，需删除关联缓存
      *
      * @param permissionId
      * @return 删除对象个数
@@ -93,5 +95,13 @@ public interface RolePermissionService {
      * @return 关联了此权限的角色列表
      */
     List<Role> findRolesByPermissionId(Integer permissionId);
+
+    /**
+     * 查询角色所拥有的权限码列表
+     *
+     * @param roleId 角色Id
+     * @return 权限码列表
+     */
+    List<String> findPermissionCodeByRoleId(Integer roleId);
 
 }
