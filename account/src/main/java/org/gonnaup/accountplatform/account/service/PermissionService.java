@@ -66,6 +66,13 @@ public interface PermissionService {
     Permission findByPermissionId(Integer permissionId);
 
     /**
+     * 获取所有权限列表
+     *
+     * @return 所有权限列表
+     */
+    List<Permission> findAll();
+
+    /**
      * 分页查询
      *
      * @param example  查询条件

@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @version created at 2023/6/30 上午12:05
  */
 @Service
-public class AccountOutlineServiceImpl implements AccountOutlineService {
+public class AccountOutlineServiceImpl {
 
     private static final Logger logger = LoggerFactory.getLogger(AccountOutlineServiceImpl.class);
 
@@ -24,12 +24,5 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
         this.identifyGenerateService = identifyGenerateService;
     }
 
-    @Override
-    @Transactional
-    public void test() {
-        for (int i = 0; i < 10000; i++) {
-            Long id = identifyGenerateService.generateAccountId();
-            logger.info("generate account id {}", id);
-        }
-    }
+
 }
