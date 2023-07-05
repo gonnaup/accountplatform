@@ -44,6 +44,10 @@ public class RolePermission {
         return new RolePermission(pk, role, permission);
     }
 
+    public static RolePermission of(Role role, Permission permission) {
+        return new RolePermission(RolePermissionPk.of(role.getId(), permission.getId()), role, permission);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

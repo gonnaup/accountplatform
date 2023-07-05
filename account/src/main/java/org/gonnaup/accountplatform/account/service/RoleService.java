@@ -57,6 +57,22 @@ public interface RoleService {
     GenericPage<Role> findRoleListPaged(Role example, Pageable pageable);
 
     /**
+     * 根据Id查询角色
+     *
+     * @param roleId 角色Id
+     * @return 角色对象
+     */
+    Role findRoleById(Integer roleId);
+
+    /**
+     * 根据Id列表查询角色列表
+     *
+     * @param roleIdList
+     * @return
+     */
+    List<Role> findRolesByIdList(List<Integer> roleIdList);
+
+    /**
      * 获取角色的权限码
      *
      * @param roleId 角色Id

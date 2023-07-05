@@ -22,7 +22,7 @@ public class Permission extends TimedEntity {
     /**
      * 权限名称
      */
-    @Column(name = "permission_name", length = 100, nullable = false)
+    @Column(name = "permission_name", length = 100, nullable = false, unique = true)
     private String permissionName;
 
     /**
