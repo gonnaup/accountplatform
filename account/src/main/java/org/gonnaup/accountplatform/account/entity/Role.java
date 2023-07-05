@@ -17,7 +17,7 @@ public class Role extends TimedEntity {
     @Id
     private Integer id;
 
-    @Column(name = "role_name", length = 100, nullable = false)
+    @Column(name = "role_name", length = 100, nullable = false, unique = true)
     private String roleName;
 
     @Column(name = "role_name", length = 200, nullable = false)

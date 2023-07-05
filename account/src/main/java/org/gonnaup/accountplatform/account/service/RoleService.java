@@ -32,20 +32,29 @@ public interface RoleService {
     int addRoleAndAttachPermissions(Role role, List<Integer> permissionIds);
 
     /**
-     * 更新角色
+     * 更新角色，不更新权限码字段
      *
      * @param role 角色对象
      * @return 更新条数
      */
-    int updateRole(Role role);
+    Role updateRoleExceptPermissionCode(Role role);
+
+    /**
+     * 更新角色的权限码
+     *
+     * @param roleId         角色Id
+     * @param permissionCode 权限码
+     * @return 更新数据条数
+     */
+    int updateRolePermissionCode(Integer roleId, String permissionCode);
 
     /**
      * 删除角色
      *
-     * @param roleId
-     * @return
+     * @param roleId 角色Id
+     * @return 删除的角色对象
      */
-    int deleteRole(Integer roleId);
+    Role deleteRole(Integer roleId);
 
     /**
      * 分页查询

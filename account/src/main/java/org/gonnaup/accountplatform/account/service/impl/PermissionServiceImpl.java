@@ -12,10 +12,14 @@ import org.gonnaup.accountplatform.account.util.AuthUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +63,9 @@ public class PermissionServiceImpl implements PermissionService {
     public Permission addPermission(Permission permission) {
         Integer id = identifyGenerateService.generateAuthId();
         permission.setId(id);// set Id
+        LocalDateTime time = LocalDateTime.now();
+        permission.setCreateTime(time);
+        permission.setUpdateTime(time);
         int nextPermissionLocation = generateNextPermissionLocation();
         //权限位检查
         if (nextPermissionLocation != permission.getPermissionLocation()) {
@@ -146,6 +153,7 @@ public class PermissionServiceImpl implements PermissionService {
      * @return 下一个权限位
      */
     @Override
+    @Transactional
     public int generateNextPermissionLocation() {
         return permissionRepository.findNextPermissionLocation();
     }
@@ -180,7 +188,13 @@ public class PermissionServiceImpl implements PermissionService {
      */
     @Override
     public GenericPage<Permission> findPermissionPaged(Permission example, Pageable pageable) {
-        return null;
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                .withMatcher("permissionName", matcher -> matcher.contains())
+                .withMatcher("permissionLocalName", matcher -> matcher.contains())
+                .withMatcher("resources", matcher -> matcher.contains())
+                .withMatcher("description", matcher -> matcher.contains());
+        Page<Permission> page = permissionRepository.findAll(Example.of(example, exampleMatcher), pageable);
+        return GenericPage.fromPage(page);
     }
 
     /**
