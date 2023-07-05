@@ -22,12 +22,11 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring.boot.version>3.1.0</spring.boot.version>
+        <spring.boot.version>3.1.1</spring.boot.version>
         <spring.cloud.version>2022.0.3</spring.cloud.version>
         <spring.cloud.alibaba.version>2021.0.4.0</spring.cloud.alibaba.version>
         <mysql.version>8.0.33</mysql.version>
         <snakeyaml.version>2.0</snakeyaml.version>
-        <codec.version>1.15</codec.version>
     </properties>
 
     <dependencyManagement>

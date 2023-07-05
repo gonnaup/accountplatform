@@ -13,8 +13,9 @@ import java.util.List;
  */
 public enum AccountState {
     Normal("N", "正常"),
-    Disabled("D", "已禁用"),
-    Removed("R", "已删除");
+    Locked("L", "锁定"),
+    Disabled("D", "禁用"),
+    Removed("R", "删除");
     public final String value;
 
     public final String label;
