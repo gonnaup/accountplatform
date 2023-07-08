@@ -63,7 +63,15 @@ public interface PermissionService {
      * @param permissionId 权限ID
      * @return 权限对象
      */
-    Permission findByPermissionId(Integer permissionId);
+    Permission findPermissionById(Integer permissionId);
+
+    /**
+     * 根据Id列表查询权限列表
+     *
+     * @param permissionIds 权限Id列表
+     * @return 权限列表
+     */
+    List<Permission> findPermissionsByIdList(List<Integer> permissionIds);
 
     /**
      * 获取所有权限列表

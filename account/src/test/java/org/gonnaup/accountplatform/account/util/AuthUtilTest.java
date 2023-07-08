@@ -1,5 +1,6 @@
 package org.gonnaup.accountplatform.account.util;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.RepeatedTest;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -96,9 +98,7 @@ class AuthUtilTest {
         assertTrue(chainList.stream().allMatch(c -> AuthUtil.hasPermission(merged, c)));
 
         //列表外的全无权限
-        Set<Integer> locSet = new HashSet<>(permissionLocationLists);
-        List<String> noP = IntStream.range(1, 1000).filter(l -> !locSet.contains(l)).mapToObj(AuthUtil::generatePermissionChain).toList();
-        assertTrue(noP.stream().noneMatch(c -> AuthUtil.hasPermission(merged, c)));
+        outListPermissionCheck(merged);
     }
 
     @RepeatedTest(5)
@@ -130,8 +130,44 @@ class AuthUtilTest {
         List<String> revList = IntStream.range(1, 1000).filter(l0 -> !locSet.contains(l0)).mapToObj(AuthUtil::generatePermissionChain).toList();
         assertTrue(revList.stream().noneMatch(s -> AuthUtil.hasPermission(granted, s)));
         assertFalse(AuthUtil.hasPermission(granted, revList));
+    }
 
+    @RepeatedTest(5)
+    void removePermissionTest() {
+        String own = AuthUtil.generatePermissionChain(permissionLocationLists);
+        Assertions.assertTrue(permissionLocationLists.size() >= 100);
+        String removed = AuthUtil.generatePermissionChain(permissionLocationLists.get(0));
+        assertTrue(AuthUtil.hasPermission(own, removed));
+        String ownRemoveOne = AuthUtil.removePermission(own, removed);
+        assertFalse(AuthUtil.hasPermission(ownRemoveOne, removed));
+        assertTrue(permissionLocationLists.subList(1, permissionLocationLists.size()).stream()
+                .map(AuthUtil::generatePermissionChain)
+                .allMatch(code -> AuthUtil.hasPermission(ownRemoveOne, code))
+        );
+        outListPermissionCheck(ownRemoveOne);
 
+        // remove list size 50
+        List<String> removeList = permissionLocationLists.subList(0, 50).stream().map(AuthUtil::generatePermissionChain).toList();
+        String ownRemoveList = AuthUtil.removePermission(own, removeList);
+        assertFalse(AuthUtil.hasPermission(ownRemoveList, removeList));
+        assertTrue(removeList.stream().noneMatch(code -> AuthUtil.hasPermission(ownRemoveList, code)));
+        assertTrue(permissionLocationLists.subList(50, permissionLocationLists.size()).stream()
+                .map(AuthUtil::generatePermissionChain)
+                .allMatch(code -> AuthUtil.hasPermission(ownRemoveList, code)));
+
+        outListPermissionCheck(ownRemoveList);
+    }
+
+    /**
+     * 检查在权限列表外的权限位权限
+     *
+     * @param permissionCode
+     */
+    private void outListPermissionCheck(String permissionCode) {
+        //列表外的全无权限
+        Set<Integer> locSet = new HashSet<>(permissionLocationLists);
+        List<String> noP = IntStream.range(1, 1000).filter(l -> !locSet.contains(l)).mapToObj(AuthUtil::generatePermissionChain).toList();
+        assertTrue(noP.stream().noneMatch(c -> AuthUtil.hasPermission(permissionCode, c)));
     }
 
 

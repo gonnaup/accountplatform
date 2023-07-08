@@ -82,6 +82,13 @@ public interface RoleService {
     List<Role> findRolesByIdList(List<Integer> roleIdList);
 
     /**
+     * 查询所有角色
+     *
+     * @return
+     */
+    List<Role> findAll();
+
+    /**
      * 获取角色的权限码
      *
      * @param roleId 角色Id

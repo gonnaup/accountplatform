@@ -25,12 +25,40 @@ public interface RolePermissionService {
     RolePermission addRolePermission(RolePermissionPk rolePermissionPk);
 
     /**
-     * 批量添加角色权限关联对象，如果有权限缓存，需删除关联缓存
+     * 为某角色批量添加角色权限关联对象，如果有权限缓存，需删除关联缓存
      *
-     * @param rolePermissionPkList roleId-permissionId列表
+     * @param roleId        角色Id
+     * @param permissionIds 权限Id列表，必须是没有和角色关联的权限
      * @return 添加的数量
      */
-    int addRolePermissionList(List<RolePermissionPk> rolePermissionPkList);
+    int roleAttachPermissions(Integer roleId, List<Integer> permissionIds);
+
+    /**
+     * 为某权限批量添加角色权限关联对象，如果有权限缓存，需删除关联缓存
+     *
+     * @param permissionId 权限Id
+     * @param roleIds      角色Id列表，必须是没有和权限关联的角色
+     * @return 添加的数量
+     */
+    int permissionAttachRoles(Integer permissionId, List<Integer> roleIds);
+
+    /**
+     * 为角色重新关联权限列表，先删除已有的关联关系，再重新关联列表
+     *
+     * @param roleId       角色Id
+     * @param permissionId 权限Id列表
+     * @return 重新关联的个数
+     */
+    int updateRoleAttachPermissions(Integer roleId, List<Integer> permissionIds);
+
+    /**
+     * 为权限重新关联角色列表，先删除原有关联关系， 再重新关联
+     *
+     * @param permissionId 权限Id
+     * @param roleIds      角色Id列表
+     * @return 重新关联的个数
+     */
+    int updatePermissionAttachRoles(Integer permissionId, List<Integer> roleIds);
 
     /**
      * 根据联合主键删除一个关联对象，如果有权限缓存，需删除关联缓存
@@ -41,12 +69,22 @@ public interface RolePermissionService {
     int deleteByPrimaryKey(RolePermissionPk rolePermissionPk);
 
     /**
-     * 批量删除关联对象，如果有权限缓存，需删除关联缓存
+     * 批量删除某角色的关联对象，如果有权限缓存，需删除关联缓存
      *
-     * @param rolePermissionPkList 关联对象主键列表
+     * @param roleId        角色Id
+     * @param permissionIds 关联的权限Id列表
      * @return 删除的数量
      */
-    int deleteByPrimaryKeyList(List<RolePermissionPk> rolePermissionPkList);
+    int deleteRoleRef(Integer roleId, List<Integer> permissionIds);
+
+    /**
+     * 批量删除某权限的关联对象，如果有权限缓存，需删除关联缓存
+     *
+     * @param permissionId 权限Id
+     * @param roleIds      角色Id列表
+     * @return 删除的数量
+     */
+    int deletePermissionRef(Integer permissionId, List<Integer> roleIds);
 
     /**
      * 根据角色ID删除关联关系，如果有权限缓存，需删除关联缓存
@@ -81,6 +119,14 @@ public interface RolePermissionService {
     List<Permission> findPermissionsByRoleId(Integer roleId);
 
     /**
+     * 查询没有和某个角色关联的权限列表
+     *
+     * @param roleId 角色Id
+     * @return 权限列表
+     */
+    List<Permission> findPermissionsNotAttachRole(Integer roleId);
+
+    /**
      * 查询某个权限被多少角色关联
      *
      * @param permissionId
@@ -97,11 +143,11 @@ public interface RolePermissionService {
     List<Role> findRolesByPermissionId(Integer permissionId);
 
     /**
-     * 查询角色所拥有的权限码列表
+     * 查询没有和某权限关联的角色
      *
-     * @param roleId 角色Id
-     * @return 权限码列表
+     * @param permissionId 权限Id
+     * @return 角色列表
      */
-    List<String> findPermissionCodeByRoleId(Integer roleId);
+    List<Role> findRolesNotAttachPermission(Integer permissionId);
 
 }

@@ -119,8 +119,37 @@ public class AuthUtil {
         return mergePermissonChain(ownPermissionChain, mergePermissionChainList(grantedPermissionChains));
     }
 
+    /**
+     * 给<code>ownPermissionChain</code>授予<code>grantedPermissionChain</code>权限
+     *
+     * @param ownPermissionChain     拥有的权限链
+     * @param grantedPermissionChain 新授予权限链
+     * @return 新权限链
+     */
     public static String grantPermission(String ownPermissionChain, String grantedPermissionChain) {
         return grantPermission(ownPermissionChain, List.of(grantedPermissionChain));
+    }
+
+    /**
+     * 移除权限中的某些权限
+     *
+     * @param ownPermissionChain     拥有的权限
+     * @param removedPermissionChain 移除的权限
+     * @return 移除权限后剩余的权限
+     */
+    public static String removePermission(String ownPermissionChain, String removedPermissionChain) {
+        return removePermissionChain(ownPermissionChain, removedPermissionChain);
+    }
+
+    /**
+     * 移除权限中的某列权限
+     *
+     * @param ownPermissionChain         拥有的权限
+     * @param removedPermissionChainList 移除的权限列表
+     * @return 移除权限列表后剩余的权限
+     */
+    public static String removePermission(String ownPermissionChain, List<String> removedPermissionChainList) {
+        return removedPermissionChainList.stream().reduce(ownPermissionChain, AuthUtil::removePermissionChain);
     }
 
     /**
@@ -213,9 +242,9 @@ public class AuthUtil {
     /**
      * 合并两个权限链
      *
-     * @param ownPermissionChain
-     * @param grantedPermissionChain
-     * @return
+     * @param ownPermissionChain     拥有的权限链
+     * @param grantedPermissionChain 授权的权限链
+     * @return 授权后的权限链
      */
     private static String mergePermissonChain(String ownPermissionChain, String grantedPermissionChain) {
         String[] owns = ownPermissionChain.split(PERMISSION_CHAIN_SPLITER);
@@ -249,7 +278,29 @@ public class AuthUtil {
     }
 
     /**
-     * 合并单个权限码
+     * 移除权限链中的权限
+     *
+     * @param ownPermissionChain
+     * @param removedPermissionChain
+     * @return
+     */
+    private static String removePermissionChain(String ownPermissionChain, String removedPermissionChain) {
+        String[] owns = ownPermissionChain.split(PERMISSION_CHAIN_SPLITER);
+        String[] removeds = removedPermissionChain.split(PERMISSION_CHAIN_SPLITER);
+        int ownsLength = owns.length;
+        int removedsLength = removeds.length;
+        for (int i = 0; i < ownsLength; i++) {
+            if (i < removedsLength) {
+                owns[i] = removeSinglePermissionCode(owns[i], removeds[i]);
+            } else {
+                break;
+            }
+        }
+        return String.join(PERMISSION_CHAIN_SPLITER, owns);
+    }
+
+    /**
+     * 合并单个权限码，own | granted
      *
      * @param ownPermissionCode     已有权限码
      * @param grantedPermissionCode 待授予的权限码
@@ -261,9 +312,22 @@ public class AuthUtil {
         return Long.toHexString(own | granted);
     }
 
+    /**
+     * 移除权限码中的权限，own &= ~removed
+     *
+     * @param ownPermissionCode     权限码
+     * @param removedPermissionCode 要移除的权限
+     * @return 清除权限后的权限码
+     */
+    private static String removeSinglePermissionCode(String ownPermissionCode, String removedPermissionCode) {
+        long own = parsePermissionCodeToLong(ownPermissionCode);
+        long removed = parsePermissionCodeToLong(removedPermissionCode);
+        return Long.toHexString(own & (~removed));
+    }
+
 
     /**
-     * 单个权限码情况下判断是否有权限
+     * 单个权限码情况下判断是否有权限，own & needed == needed
      *
      * @param ownPermissionCode    拥有的权限码
      * @param neededPermissionCode 需要包含的权限

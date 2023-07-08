@@ -2,7 +2,6 @@ package org.gonnaup.accountplatform.account.service.impl;
 
 import org.gonnaup.accountplatform.account.domain.GenericPage;
 import org.gonnaup.accountplatform.account.entity.Role;
-import org.gonnaup.accountplatform.account.entity.RolePermissionPk;
 import org.gonnaup.accountplatform.account.exception.RecordNotExistException;
 import org.gonnaup.accountplatform.account.repository.RoleRepository;
 import org.gonnaup.accountplatform.account.service.IdentifyGenerateService;
@@ -80,8 +79,7 @@ public class RoleServiceImpl implements RoleService {
         Role r = addRole(role);
         if (permissionIds.size() > 0) {
             final Integer roleId = r.getId();
-            List<RolePermissionPk> rolePermissionPks = permissionIds.stream().map(permissionId -> RolePermissionPk.of(roleId, permissionId)).toList();
-            int count = rolePermissionService.addRolePermissionList(rolePermissionPks);
+            int count = rolePermissionService.roleAttachPermissions(roleId, permissionIds);
             if (logger.isDebugEnabled()) {
                 logger.debug("需要与角色 {} 关联的权限 {} 共 {} 个", roleId, permissionIds, permissionIds.size());
             }
@@ -193,6 +191,16 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public List<Role> findRolesByIdList(List<Integer> roleIdList) {
         return roleRepository.findAllById(roleIdList);
+    }
+
+    /**
+     * 查询所有角色
+     *
+     * @return
+     */
+    @Override
+    public List<Role> findAll() {
+        return roleRepository.findAll();
     }
 
     /**

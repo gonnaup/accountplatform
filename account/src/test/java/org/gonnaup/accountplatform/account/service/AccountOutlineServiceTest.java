@@ -20,6 +20,5 @@ class AccountOutlineServiceTest {
 
     @Test
     void test1() {
-        accountOutlineService.test();
     }
 }

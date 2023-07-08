@@ -2,7 +2,6 @@ package org.gonnaup.accountplatform.account.service.impl;
 
 import org.gonnaup.accountplatform.account.domain.GenericPage;
 import org.gonnaup.accountplatform.account.entity.Permission;
-import org.gonnaup.accountplatform.account.entity.RolePermissionPk;
 import org.gonnaup.accountplatform.account.exception.RecordNotExistException;
 import org.gonnaup.accountplatform.account.repository.PermissionRepository;
 import org.gonnaup.accountplatform.account.service.IdentifyGenerateService;
@@ -92,8 +91,7 @@ public class PermissionServiceImpl implements PermissionService {
         final Permission p = addPermission(permission);
         if (roleIds.size() > 0) {
             final Integer permissionId = p.getId();
-            List<RolePermissionPk> rolePermissionPks = roleIds.stream().map(roleId -> RolePermissionPk.of(roleId, permissionId)).toList();
-            int count = rolePermissionService.addRolePermissionList(rolePermissionPks);
+            int count = rolePermissionService.permissionAttachRoles(permissionId, roleIds);
             if (logger.isDebugEnabled()) {
                 logger.debug("需要与权限 {} 关联的角色 {} 共 {} 个", permissionId, roleIds, roleIds.size());
             }
@@ -137,7 +135,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @Transactional
     public Permission deletePermission(Integer permissionId) {
-        Permission permission = findByPermissionId(permissionId);
+        Permission permission = findPermissionById(permissionId);
         if (permission == null) {
             logger.error("要删除的权限 {} 不存在", permissionId);
             throw new RecordNotExistException("error.permission.notexist." + permissionId);
@@ -165,8 +163,19 @@ public class PermissionServiceImpl implements PermissionService {
      * @return 权限对象
      */
     @Override
-    public Permission findByPermissionId(Integer permissionId) {
+    public Permission findPermissionById(Integer permissionId) {
         return permissionRepository.findById(permissionId).orElse(null);
+    }
+
+    /**
+     * 根据Id列表查询权限列表
+     *
+     * @param permissionIds 权限Id列表
+     * @return 权限列表
+     */
+    @Override
+    public List<Permission> findPermissionsByIdList(List<Integer> permissionIds) {
+        return permissionRepository.findAllById(permissionIds);
     }
 
     /**

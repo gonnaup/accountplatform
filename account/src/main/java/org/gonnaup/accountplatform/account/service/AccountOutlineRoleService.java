@@ -4,6 +4,7 @@ import org.gonnaup.accountplatform.account.domain.GenericPage;
 import org.gonnaup.accountplatform.account.entity.AccountOutline;
 import org.gonnaup.accountplatform.account.entity.AccountOutlineRole;
 import org.gonnaup.accountplatform.account.entity.AccountOutlineRolePk;
+import org.gonnaup.accountplatform.account.entity.Role;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -91,5 +92,20 @@ public interface AccountOutlineRoleService {
      */
     GenericPage<AccountOutline> findAccountOutlinesByRoleIdPaged(Integer roleId, Pageable pageable);
 
+    /**
+     * 查询某角色与帐号的所有关联关系
+     *
+     * @param roleId 角色Id
+     * @return 角色-帐号关联关系列表
+     */
+    List<AccountOutlineRole> findByRoleId(Integer roleId);
+
+    /**
+     * 查询帐号的所有角色列表
+     *
+     * @param accountId 帐号Id
+     * @return 角色列表
+     */
+    List<Role> findRolesByAccountId(Long accountId);
 
 }
