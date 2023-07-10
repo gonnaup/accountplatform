@@ -23,43 +23,53 @@ public interface AccountOutlineService {
     /**
      * 更新帐号名
      *
-     * @param accountOutline
+     * @param id          帐号Id
+     * @param accountName 新账户名
      * @return 更新帐号数
      */
-    int updateAccountName(String accountName);
+    int updateAccountName(Long id, String accountName);
 
     /**
      * 更新账户状态
      *
-     * @param accountId 帐号Id
-     * @param state     新状态
+     * @param id    帐号Id
+     * @param state 新状态
      * @return 更新条数
      */
-    int updateState(Long accountId, AccountState state);
+    int updateState(Long id, AccountState state);
 
     /**
-     * 更新除 accountName, state字段外的其他信息
+     * 更新账户头像url
+     *
+     * @param id  账户id
+     * @param url 头像url
+     * @return 更新条数
+     */
+    int updateAvatarUrl(Long id, String url);
+
+    /**
+     * 更新简要信息，nickName, gender, region, personalSignature
      *
      * @param accountOutline 更新对象
      * @return
      */
-    AccountOutline updateAccountOutlineExeptAccountNameAndState(AccountOutline accountOutline);
+    AccountOutline updateAccountOutlineBrief(AccountOutline accountOutline);
 
     /**
      * 禁用帐号
      *
-     * @param accountId 帐号Id
+     * @param id 帐号Id
      * @return 禁用帐号数
      */
-    int disableAccount(Long accountId);
+    int disableAccount(Long id);
 
     /**
      * 将帐号置于移除状态
      *
-     * @param accountId 帐号Id
+     * @param id 帐号Id
      * @return 移除帐号数
      */
-    int removeAccount(Long accountId);
+    int removeAccount(Long id);
 
     /**
      * 分页查询
@@ -73,10 +83,10 @@ public interface AccountOutlineService {
     /**
      * 根据Id查询帐号概要信息
      *
-     * @param accountId 帐号Id
+     * @param id 帐号Id
      * @return 帐号概要信息
      */
-    AccountOutline findAccountOutlineByAccountId(Long accountId);
+    AccountOutline findAccountOutlineByAccountId(Long id);
 
     /**
      * 根据帐号名查询帐号概要信息
@@ -87,18 +97,26 @@ public interface AccountOutlineService {
     AccountOutline findAccountOutlineByAccountName(String accountName);
 
     /**
+     * 查询账户名是否已经存在
+     *
+     * @param accountName 账户名
+     * @return 如果已经存在返回true，不存在返回false
+     */
+    boolean accountNameExist(String accountName);
+
+    /**
      * 计算帐号的权限码，带缓存
      *
-     * @param accountId 帐号Id
+     * @param id 帐号Id
      * @return 权限码
      */
-    String calculatePermissionCode(Long accountId);
+    String calculatePermissionCode(Long id);
 
     /**
      * 清除账户权限码缓存
      *
-     * @param accountId 帐号Id
+     * @param id 帐号Id
      */
-    void clearPermissionCodeCache(Long accountId);
+    void clearPermissionCodeCache(Long id);
 
 }

@@ -2,6 +2,7 @@ package org.gonnaup.accountplatform.account.entity;
 
 import jakarta.persistence.*;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -77,6 +78,19 @@ public class Permission extends TimedEntity {
                 .add("permissionLocation=" + permissionLocation)
                 .add("description='" + description + "'")
                 .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Permission that = (Permission) o;
+        return Objects.equals(id, that.id) && Objects.equals(permissionName, that.permissionName) && Objects.equals(resources, that.resources) && Objects.equals(permissionLocation, that.permissionLocation) && Objects.equals(permissionCode, that.permissionCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, permissionName, resources, permissionLocation, permissionCode);
     }
 
     public Integer getId() {

@@ -5,6 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.util.Objects;
+import java.util.StringJoiner;
+
 /**
  * 角色
  *
@@ -34,6 +37,29 @@ public class Role extends TimedEntity {
     @Column(length = 500)
     private String description;
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Role.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("roleName='" + roleName + "'")
+                .add("roleLocalName='" + roleLocalName + "'")
+                .add("permissionCode='" + permissionCode + "'")
+                .add("description='" + description + "'")
+                .toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Role role = (Role) o;
+        return Objects.equals(id, role.id) && Objects.equals(roleName, role.roleName) && Objects.equals(permissionCode, role.permissionCode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, roleName, permissionCode);
+    }
 
     public Integer getId() {
         return id;

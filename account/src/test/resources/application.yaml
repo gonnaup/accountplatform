@@ -13,3 +13,22 @@ spring:
     #    show-sql: true
     hibernate:
       ddl-auto: update
+  data:
+    redis:
+      database: 1
+      url: gonnaup.cn
+      password: 123456
+  cache:
+    type: REDIS
+    redis:
+      time-to-live: 30m
+accountplatform:
+  account:
+    default:
+      account-name:
+        prefix: xid_
+        length: 30
+      avatar:
+        host: http://localhost
+        path: /static/
+        file-name: default_avatar.svg
