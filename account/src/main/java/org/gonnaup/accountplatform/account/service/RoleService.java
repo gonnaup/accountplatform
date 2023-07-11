@@ -23,15 +23,6 @@ public interface RoleService {
     Role addRole(Role role);
 
     /**
-     * 添加角色并关联权限列表
-     *
-     * @param role          角色对象
-     * @param permissionIds 要关联的权限ID列表
-     * @return 成功关联的数量
-     */
-    int addRoleAndAttachPermissions(Role role, List<Integer> permissionIds);
-
-    /**
      * 更新角色，不更新权限码字段
      *
      * @param role 角色对象

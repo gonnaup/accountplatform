@@ -36,6 +36,54 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     private AccountOutlineService accountOutlineService;
 
     /**
+     * 添加角色并关联权限列表
+     *
+     * @param role          角色对象
+     * @param permissionIds 要关联的权限ID列表
+     * @return 成功关联的数量
+     */
+    @Override
+    @Transactional
+    public int addRoleAndAttachPermissions(Role role, List<Integer> permissionIds) {
+        Role r = roleService.addRole(role);
+        if (permissionIds.size() > 0) {
+            final Integer roleId = r.getId();
+            int count = roleAttachPermissions(roleId, permissionIds);
+            if (logger.isDebugEnabled()) {
+                logger.debug("需要与角色 {} 关联的权限 {} 共 {} 个", roleId, permissionIds, permissionIds.size());
+            }
+            logger.info("{}个权限和角色 {} 成功关联", count, roleId);
+            return count;
+        }
+        logger.warn("需要和角色 {} 关联的权限个数为0", r.getId());
+        return 0;
+    }
+
+    /**
+     * 添加权限并与角色列表关联
+     *
+     * @param permission 权限对象
+     * @param roleIds    角色列表
+     * @return 成功关联角色的数量
+     */
+    @Override
+    @Transactional
+    public int addPermissionAndAttachRoles(Permission permission, List<Integer> roleIds) {
+        final Permission p = permissionService.addPermission(permission);
+        if (roleIds.size() > 0) {
+            final Integer permissionId = p.getId();
+            int count = permissionAttachRoles(permissionId, roleIds);
+            if (logger.isDebugEnabled()) {
+                logger.debug("需要与权限 {} 关联的角色 {} 共 {} 个", permissionId, roleIds, roleIds.size());
+            }
+            logger.info("{}个角色和权限 {} 成功关联", count, permissionId);
+            return count;
+        }
+        logger.warn("需要和权限 {} 关联的角色个数为0", p.getId());
+        return 0;
+    }
+
+    /**
      * 添加关联对象，如果有权限缓存，需删除关联缓存
      *
      * @param rolePermissionPk@return 添加的对象

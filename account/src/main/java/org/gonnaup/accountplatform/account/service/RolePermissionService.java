@@ -16,6 +16,24 @@ import java.util.List;
 public interface RolePermissionService {
 
     /**
+     * 添加角色并关联权限列表
+     *
+     * @param role          角色对象
+     * @param permissionIds 要关联的权限ID列表
+     * @return 成功关联的数量
+     */
+    int addRoleAndAttachPermissions(Role role, List<Integer> permissionIds);
+
+    /**
+     * 添加权限并与角色列表关联
+     *
+     * @param permission 权限对象
+     * @param roleIds    角色列表
+     * @return 成功关联角色的数量
+     */
+    int addPermissionAndAttachRoles(Permission permission, List<Integer> roleIds);
+
+    /**
      * 添加关联对象，如果有权限缓存，需删除关联缓存
      *
      * @param roleId       角色ID

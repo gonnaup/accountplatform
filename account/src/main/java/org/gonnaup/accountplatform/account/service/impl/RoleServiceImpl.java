@@ -5,7 +5,6 @@ import org.gonnaup.accountplatform.account.entity.Role;
 import org.gonnaup.accountplatform.account.exception.RecordNotExistException;
 import org.gonnaup.accountplatform.account.repository.RoleRepository;
 import org.gonnaup.accountplatform.account.service.IdentifyGenerateService;
-import org.gonnaup.accountplatform.account.service.RolePermissionService;
 import org.gonnaup.accountplatform.account.service.RoleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,13 +36,10 @@ public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;
 
-    private final RolePermissionService rolePermissionService;
-
     @Autowired
-    public RoleServiceImpl(IdentifyGenerateService identifyGenerateService, RoleRepository roleRepository, RolePermissionService rolePermissionService) {
+    public RoleServiceImpl(IdentifyGenerateService identifyGenerateService, RoleRepository roleRepository) {
         this.identifyGenerateService = identifyGenerateService;
         this.roleRepository = roleRepository;
-        this.rolePermissionService = rolePermissionService;
     }
 
     /**
@@ -64,30 +60,6 @@ public class RoleServiceImpl implements RoleService {
         Role saved = roleRepository.save(role);
         logger.info("成功添加角色 {}", saved);
         return saved;
-    }
-
-    /**
-     * 添加角色并关联权限列表
-     *
-     * @param role          角色对象
-     * @param permissionIds 要关联的权限ID列表
-     * @return 成功关联的数量
-     */
-    @Override
-    @Transactional
-    public int addRoleAndAttachPermissions(Role role, List<Integer> permissionIds) {
-        Role r = addRole(role);
-        if (permissionIds.size() > 0) {
-            final Integer roleId = r.getId();
-            int count = rolePermissionService.roleAttachPermissions(roleId, permissionIds);
-            if (logger.isDebugEnabled()) {
-                logger.debug("需要与角色 {} 关联的权限 {} 共 {} 个", roleId, permissionIds, permissionIds.size());
-            }
-            logger.info("{}个权限和角色 {} 成功关联", count, roleId);
-            return count;
-        }
-        logger.warn("需要和角色 {} 关联的权限个数为0", r.getId());
-        return 0;
     }
 
     /**

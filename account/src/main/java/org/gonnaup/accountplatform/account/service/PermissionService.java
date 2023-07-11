@@ -23,16 +23,6 @@ public interface PermissionService {
     Permission addPermission(Permission permission);
 
     /**
-     * 添加权限并与角色列表关联
-     *
-     * @param permission 权限对象
-     * @param roleIds    角色列表
-     * @return 成功关联角色的数量
-     */
-    int addPermissionAndAttachRoles(Permission permission, List<Integer> roleIds);
-
-
-    /**
      * 更新权限对象的非权限部分字段
      * <p>
      * permissionName, permissionLocalName, resources, description

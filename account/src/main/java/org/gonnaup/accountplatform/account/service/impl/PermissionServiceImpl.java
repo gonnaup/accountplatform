@@ -6,7 +6,6 @@ import org.gonnaup.accountplatform.account.exception.RecordNotExistException;
 import org.gonnaup.accountplatform.account.repository.PermissionRepository;
 import org.gonnaup.accountplatform.account.service.IdentifyGenerateService;
 import org.gonnaup.accountplatform.account.service.PermissionService;
-import org.gonnaup.accountplatform.account.service.RolePermissionService;
 import org.gonnaup.accountplatform.account.util.AuthUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,14 +37,10 @@ public class PermissionServiceImpl implements PermissionService {
 
     private final IdentifyGenerateService identifyGenerateService;
 
-    private final RolePermissionService rolePermissionService;
-
     @Autowired
-    public PermissionServiceImpl(PermissionRepository permissionRepository, IdentifyGenerateService identifyGenerateService,
-                                 RolePermissionService rolePermissionService) {
+    public PermissionServiceImpl(PermissionRepository permissionRepository, IdentifyGenerateService identifyGenerateService) {
         this.permissionRepository = permissionRepository;
         this.identifyGenerateService = identifyGenerateService;
-        this.rolePermissionService = rolePermissionService;
     }
 
     /**
@@ -76,30 +71,6 @@ public class PermissionServiceImpl implements PermissionService {
         Permission saved = permissionRepository.save(permission);
         logger.info("添加权限 {} 成功", saved);
         return saved;
-    }
-
-    /**
-     * 添加权限并与角色列表关联
-     *
-     * @param permission 权限对象
-     * @param roleIds    角色列表
-     * @return 成功关联角色的数量
-     */
-    @Override
-    @Transactional
-    public int addPermissionAndAttachRoles(Permission permission, List<Integer> roleIds) {
-        final Permission p = addPermission(permission);
-        if (roleIds.size() > 0) {
-            final Integer permissionId = p.getId();
-            int count = rolePermissionService.permissionAttachRoles(permissionId, roleIds);
-            if (logger.isDebugEnabled()) {
-                logger.debug("需要与权限 {} 关联的角色 {} 共 {} 个", permissionId, roleIds, roleIds.size());
-            }
-            logger.info("{}个角色和权限 {} 成功关联", count, permissionId);
-            return count;
-        }
-        logger.warn("需要和权限 {} 关联的角色个数为0", p.getId());
-        return 0;
     }
 
     /**
