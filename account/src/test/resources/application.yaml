@@ -1,12 +1,14 @@
 server:
   port: 10003
 spring:
+  main:
+    allow-circular-references: true
   application:
     name: account_platform
   datasource:
     username: gonnaup
     password: 123456
-    url: jdbc:mysql://gonnaup.cn/accountplatformtest?useSSL=false
+    url: jdbc:mysql://gonnaup.com/accountplatformtest?useSSL=false
     hikari:
       maximum-pool-size: 8
   jpa:
@@ -16,7 +18,7 @@ spring:
   data:
     redis:
       database: 1
-      url: gonnaup.cn
+      url: gonnaup.com
       password: 123456
   cache:
     type: REDIS
@@ -31,4 +33,4 @@ accountplatform:
       avatar:
         host: http://localhost
         path: /static/
-        file-name: default_avatar.svg
+        default-file-name: default_avatar.svg

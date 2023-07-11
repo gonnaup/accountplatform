@@ -19,13 +19,13 @@ public class AccountOutlineRole {
     @EmbeddedId
     private AccountOutlineRolePk id;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("accountOutlineId")
     @JoinColumn(name = "accountoutline_id", foreignKey = @ForeignKey(name = "fk_accountoutline_role_accountoutline"))
     @JsonIgnore
     private AccountOutline accountOutline;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("roleId")
     @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_accountoutline_role_role"))
     @JsonIgnore

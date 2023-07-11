@@ -7,7 +7,7 @@ import org.gonnaup.accountplatform.account.entity.AccountOutline;
 import java.util.List;
 
 /**
- * 账户认真服务接口
+ * 账户认证服务接口
  *
  * @author gonnaup
  * @version created at 2023/7/5 下午5:23

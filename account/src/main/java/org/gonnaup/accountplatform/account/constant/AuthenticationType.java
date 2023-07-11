@@ -14,7 +14,7 @@ import java.util.List;
 public enum AuthenticationType {
 
     Name("N", "用户名密码"),
-    Emain("E", "邮箱");
+    Email("E", "邮箱");
     public final String value;
 
     public final String label;

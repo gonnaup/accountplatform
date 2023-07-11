@@ -9,7 +9,7 @@ import jakarta.persistence.*;
  * @version created at 2023/6/28 下午11:10
  */
 @Entity
-@Table(name = "t_account_outline", indexes = {@Index(name = "idx_accountoutline_name", columnList = "accountName", unique = true)})
+@Table(name = "t_account_outline", indexes = {@Index(name = "idx_accountoutline_name", columnList = "account_name", unique = true)})
 public class AccountOutline extends TimedEntity {
     @Id
     private Long id;

@@ -18,14 +18,14 @@ public class RolePermission {
     @EmbeddedId
     private RolePermissionPk id;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("roleId")
     //外键列名以此JoinColumn优先，如果未声明，则取MapsId对应属性的列名
     @JoinColumn(name = "role_id", foreignKey = @ForeignKey(name = "fk_role_permission_role"))
     @JsonIgnore
     private Role role;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("permissionId")
     @JoinColumn(name = "permission_id", foreignKey = @ForeignKey(name = "fk_role_permission_permission"))
     @JsonIgnore

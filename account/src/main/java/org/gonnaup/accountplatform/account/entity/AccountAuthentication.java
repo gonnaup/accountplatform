@@ -13,14 +13,24 @@ import java.util.StringJoiner;
  */
 @Entity
 @Table(name = "t_account_authentication", indexes = {@Index(name = "idx_account_authentication_authenticationtype_principal",
-        columnList = "authenticationType, principal", unique = true)})
+        columnList = "authentication_type, principal", unique = true)})
 public class AccountAuthentication extends TimedEntity {
     @Id
     private Long id;
 
-    @Column(name = "account_id")
+    /**
+     * 账号Id
+     */
+    @Column(name = "account_id", nullable = false)
     private Long accountId;
 
+    /**
+     * 认证类型
+     *
+     * @see org.gonnaup.accountplatform.account.constant.AuthenticationType
+     * 一般为 {@link org.gonnaup.accountplatform.account.constant.AuthenticationType#Name} 时，credential为密码
+     * 为 {@link org.gonnaup.accountplatform.account.constant.AuthenticationType#Email} 时，使用邮箱验证码登录，credential为null
+     */
     @Column(name = "authentication_type", length = 1, nullable = false)
     private String authenticationType;
 

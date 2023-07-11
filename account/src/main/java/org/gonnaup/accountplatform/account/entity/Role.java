@@ -23,7 +23,7 @@ public class Role extends TimedEntity {
     @Column(name = "role_name", length = 100, nullable = false, unique = true)
     private String roleName;
 
-    @Column(name = "role_name", length = 200, nullable = false)
+    @Column(name = "role_local_name", length = 200, nullable = false)
     private String roleLocalName;
 
     /**
