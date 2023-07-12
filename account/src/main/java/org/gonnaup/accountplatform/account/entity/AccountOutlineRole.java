@@ -42,6 +42,15 @@ public class AccountOutlineRole {
         return ar;
     }
 
+    public static AccountOutlineRole of(AccountOutline accountOutline, Role role) {
+        AccountOutlineRolePk pk = AccountOutlineRolePk.of(accountOutline.getId(), role.getId());
+        AccountOutlineRole ar = new AccountOutlineRole();
+        ar.setId(pk);
+        ar.setAccountOutline(accountOutline);
+        ar.setRole(role);
+        return ar;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", AccountOutlineRole.class.getSimpleName() + "[", "]")

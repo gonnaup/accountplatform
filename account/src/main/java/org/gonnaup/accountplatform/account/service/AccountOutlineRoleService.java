@@ -53,12 +53,13 @@ public interface AccountOutlineRoleService {
     int deleteByPrimaryKey(AccountOutlineRolePk accountOutlineRolePk);
 
     /**
-     * 批量删除帐号的关联角色，并删除相关账号权限码缓存
+     * 批量删除帐号的关联角色列表，并删除相关账号权限码缓存
      *
-     * @param accountOutlineRolePkList
+     * @param accountId 帐号ID
+     * @param roleIds   角色列表
      * @return 删除元素个数
      */
-    int deleteByPrimaryKeyList(List<AccountOutlineRolePk> accountOutlineRolePkList);
+    int deleteAccountOutlineRoleList(Long accountId, List<Integer> roleIds);
 
     /**
      * 解除帐号的所有角色，并删除相关账号权限码缓存
@@ -67,6 +68,15 @@ public interface AccountOutlineRoleService {
      * @return 删除角色个数
      */
     int deleteByAccountOutlineId(Long accountOutlineId);
+
+    /**
+     * 解除角色关联的帐号列表， 并删除相关账号权限码缓存
+     *
+     * @param roleId     角色Id
+     * @param accountIds 帐号列表
+     * @return 删除关联帐号个数
+     */
+    int deleteRoleAccountOutlineList(Integer roleId, List<Long> accountIds);
 
     /**
      * 删除某角色对应的所有帐号关联关系，并删除相关账号权限码缓存
@@ -82,7 +92,15 @@ public interface AccountOutlineRoleService {
      * @param accountOutlineId
      * @return
      */
-    int countByAccountOutlineId(Long accountOutlineId);
+    int countRolesByAccountOutlineId(Long accountOutlineId);
+
+    /**
+     * 查询帐号未关联的角色个数
+     *
+     * @param accountOutlineId
+     * @return
+     */
+    int countRolesByNotAccountOutlineId(Long accountOutlineId);
 
     /**
      * 查询角色关联的帐号个数
@@ -90,7 +108,7 @@ public interface AccountOutlineRoleService {
      * @param roleId 角色Id
      * @return
      */
-    int countByRoleId(Integer roleId);
+    int countAccountOutlinesByRoleId(Integer roleId);
 
     /**
      * 查询角色未关联的账号个数
@@ -98,7 +116,7 @@ public interface AccountOutlineRoleService {
      * @param roleId 角色Id
      * @return
      */
-    int countByNotRoleId(Integer roleId);
+    int countAccountOutlinesByNotRoleId(Integer roleId);
 
 
     /**
@@ -119,13 +137,14 @@ public interface AccountOutlineRoleService {
      */
     GenericPage<AccountOutline> findAccountOutlinesNotAttachRolePaged(Integer roleId, Pageable pageable);
 
+
     /**
-     * 查询某角色与帐号的所有关联关系
+     * 查询拥有某角色的帐号ID列表
      *
      * @param roleId 角色Id
-     * @return 角色-帐号关联关系列表
+     * @return
      */
-    List<AccountOutlineRole> findByRoleId(Integer roleId);
+    List<Long> findAccountOutlineIdListByRoleId(Integer roleId);
 
     /**
      * 查询帐号的所有角色列表

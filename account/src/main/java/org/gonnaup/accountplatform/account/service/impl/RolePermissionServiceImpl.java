@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 角色权限关联关系服务接口实现类
@@ -191,10 +192,15 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Override
     @Transactional
     public int deleteByPrimaryKey(RolePermissionPk rolePermissionPk) {
-        rolePermissionRepository.deleteById(rolePermissionPk);
+        Optional<RolePermission> orp = rolePermissionRepository.findById(rolePermissionPk);
+        if (orp.isEmpty()) {
+            logger.warn("要删除的关联关系 {} 不存在", rolePermissionPk);
+            return 0;
+        }
         Integer roleId = rolePermissionPk.getRoleId();
         Integer permissionId = rolePermissionPk.getPermissionId();
         logger.info("开始删除角色[{}]-权限[{}]关联关系", roleId, permissionId);
+        rolePermissionRepository.deleteById(rolePermissionPk);
 
         String pCode = permissionService.findPermissionCode(permissionId);
         String rCode = roleService.findRolePermissionCode(roleId);
@@ -427,9 +433,9 @@ public class RolePermissionServiceImpl implements RolePermissionService {
      * @param roleId 角色Id
      */
     private void clearRelateRoleAccountPermissionCodeCache(Integer roleId) {
-        List<AccountOutlineRole> accountOutlineRoles = accountOutlineRoleService.findByRoleId(roleId);
-        accountOutlineRoles.forEach(accountOutlineRole -> accountOutlineService.clearPermissionCodeCache(accountOutlineRole.getId().getAccountOutlineId()));
-        logger.info("总共清除 {} 个帐号的权限码缓存", accountOutlineRoles.size());
+        List<Long> accountOutlineIdList = accountOutlineRoleService.findAccountOutlineIdListByRoleId(roleId);
+        accountOutlineIdList.forEach(accountOutlineId -> accountOutlineService.clearPermissionCodeCache(accountOutlineId));
+        logger.info("总共清除 {} 个帐号的权限码缓存", accountOutlineIdList.size());
     }
 
     @Autowired

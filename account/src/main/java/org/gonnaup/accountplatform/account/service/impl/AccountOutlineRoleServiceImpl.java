@@ -5,11 +5,20 @@ import org.gonnaup.accountplatform.account.entity.AccountOutline;
 import org.gonnaup.accountplatform.account.entity.AccountOutlineRole;
 import org.gonnaup.accountplatform.account.entity.AccountOutlineRolePk;
 import org.gonnaup.accountplatform.account.entity.Role;
+import org.gonnaup.accountplatform.account.exception.RecordNotExistException;
+import org.gonnaup.accountplatform.account.repository.AccountOutlineRoleRepository;
 import org.gonnaup.accountplatform.account.service.AccountOutlineRoleService;
+import org.gonnaup.accountplatform.account.service.AccountOutlineService;
+import org.gonnaup.accountplatform.account.service.RoleService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 账号角色关联关系服务接口实现类
@@ -20,6 +29,20 @@ import java.util.List;
 @Service
 public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AccountOutlineRoleServiceImpl.class);
+
+    private final AccountOutlineRoleRepository accountOutlineRoleRepository;
+
+    private final AccountOutlineService accountOutlineService;
+
+    private final RoleService roleService;
+
+    @Autowired
+    public AccountOutlineRoleServiceImpl(AccountOutlineRoleRepository accountOutlineRoleRepository, AccountOutlineService accountOutlineService, RoleService roleService) {
+        this.accountOutlineRoleRepository = accountOutlineRoleRepository;
+        this.accountOutlineService = accountOutlineService;
+        this.roleService = roleService;
+    }
 
     /**
      * 添加帐号-角色关联关系，并删除相关账号权限码缓存
@@ -27,9 +50,27 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @param accountOutlineRolePk@return 添加的关联对象
      */
     @Override
+    @Transactional
     public AccountOutlineRole addAccountOutlineRole(AccountOutlineRolePk accountOutlineRolePk) {
-        // TODO Auto-generated method stub
-        return null;
+        Long accountId = accountOutlineRolePk.getAccountOutlineId();
+        Integer roleId = accountOutlineRolePk.getRoleId();
+        logger.info("开始为帐号ID={}关联角色ID={}", accountId, roleId);
+        AccountOutline account = accountOutlineService.findAccountOutlineByAccountId(accountId);
+        if (account == null) {
+            logger.error("为账号添加关联角色时，帐号ID={}不存在", accountId);
+            throw new RecordNotExistException("error.accountOutlineRole.add.notexist.accountOutline." + accountId);
+        }
+        Role role = roleService.findRoleById(roleId);
+        if (role == null) {
+            logger.error("为账号添加关联角色时，角色ID={}不存在", roleId);
+            throw new RecordNotExistException("error.accountOutlineRole.add.notexist.role." + roleId);
+        }
+        AccountOutlineRole accountOutlineRole = AccountOutlineRole.of(accountOutlineRolePk, account, role);
+        AccountOutlineRole saved = accountOutlineRoleRepository.save(accountOutlineRole);
+        logger.info("帐号ID={}关联角色ID={}成功", accountId, roleId);
+
+        accountOutlineService.clearPermissionCodeCache(accountId);
+        return saved;
     }
 
     /**
@@ -40,9 +81,32 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @return 批量添加的个数
      */
     @Override
+    @Transactional
     public int addAccountOutlineRoleList(Long accountId, List<Integer> roleIds) {
-        // TODO Auto-generated method stub
-        return 0;
+        logger.info("开始为帐号ID={}批量关联角色ID={}", accountId, roleIds);
+        if (roleIds.isEmpty()) {
+            logger.error("为帐号ID={}批量关联角色时，角色列表为空", accountId);
+            throw new RecordNotExistException("error.accountOutlineRole.add.notexist.roleList");
+        }
+        AccountOutline account = accountOutlineService.findAccountOutlineByAccountId(accountId);
+        if (account == null) {
+            logger.error("为账号添加关联角色时，帐号ID={}不存在", accountId);
+            throw new RecordNotExistException("error.accountOutlineRole.add.notexist.accountOutline." + accountId);
+        }
+
+        long count = roleIds.stream().map(roleId -> {
+            Role role = roleService.findRoleById(roleId);
+            if (role == null) {
+                logger.error("为账号添加关联角色时，角色ID={}不存在", roleId);
+                throw new RecordNotExistException("error.accountOutlineRole.add.role.notexist." + roleId);
+            }
+            AccountOutlineRole accountOutlineRole = AccountOutlineRole.of(account, role);
+            return accountOutlineRoleRepository.save(accountOutlineRole);
+        }).count();
+        logger.info("总共为帐号关联{}个角色", count);
+
+        accountOutlineService.clearPermissionCodeCache(accountId);
+        return (int) count;
     }
 
     /**
@@ -53,9 +117,23 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @return 批量添加的个数
      */
     @Override
+    @Transactional
     public int addRoleAccountOutlineList(Integer roleId, List<Long> accountIds) {
-        // TODO Auto-generated method stub
-        return 0;
+        logger.info("开始为角色ID={}批量关联帐号{}", roleId, accountIds);
+        if (roleService.findRoleById(roleId) == null) {
+            logger.error("为角色批量关联帐号时，角色不存在");
+            throw new RecordNotExistException("error.accountOutlineRole.del.notexist.role." + roleId);
+        }
+        if (accountIds.isEmpty()) {
+            logger.error("为角色ID={}批量关联帐号时，帐号列表为空", roleId);
+            throw new RecordNotExistException("error.accountOutlineRole.del.notexist.accountList");
+        }
+        long count = accountIds.stream().map(accountId -> {
+            AccountOutlineRolePk pk = AccountOutlineRolePk.of(accountId, roleId);
+            return addAccountOutlineRole(pk);
+        }).count();
+        logger.info("总共为角色ID={}关联{}个帐号", roleId, count);
+        return (int) count;
     }
 
     /**
@@ -65,21 +143,57 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @return 删除元素的个数
      */
     @Override
+    @Transactional
     public int deleteByPrimaryKey(AccountOutlineRolePk accountOutlineRolePk) {
-        // TODO Auto-generated method stub
-        return 0;
+        Optional<AccountOutlineRole> oar = accountOutlineRoleRepository.findById(accountOutlineRolePk);
+        if (oar.isEmpty()) {
+            logger.error("要删除的帐号角色关联对象 {} 不存在", accountOutlineRolePk);
+            throw new RecordNotExistException("error.accountOutlineRole.del.notexist.pk");
+        }
+        Long accountId = accountOutlineRolePk.getAccountOutlineId();
+        Integer roleId = accountOutlineRolePk.getRoleId();
+        logger.info("开始删除帐号ID={}的关联角色ID={}", accountId, roleId);
+        accountOutlineRoleRepository.deleteById(accountOutlineRolePk);
+
+        accountOutlineService.clearPermissionCodeCache(accountId);
+        return 1;
     }
 
     /**
-     * 批量删除帐号的关联角色，并删除相关账号权限码缓存
+     * 批量删除帐号的关联角色列表，并删除相关账号权限码缓存
      *
-     * @param accountOutlineRolePkList
+     * @param accountId 帐号ID
+     * @param roleIds   角色列表
      * @return 删除元素个数
      */
     @Override
-    public int deleteByPrimaryKeyList(List<AccountOutlineRolePk> accountOutlineRolePkList) {
-        // TODO Auto-generated method stub
-        return 0;
+    @Transactional
+    public int deleteAccountOutlineRoleList(Long accountId, List<Integer> roleIds) {
+        logger.info("开始删除帐号ID={}的关联角色ID={}", accountId, roleIds);
+        if (roleIds.isEmpty()) {
+            logger.warn("删除帐号ID={}关联角色时，角色列表为空", accountId);
+            return 0;
+        }
+        AccountOutline account = accountOutlineService.findAccountOutlineByAccountId(accountId);
+        if (account == null) {
+            logger.error("为账号删除关联角色时，帐号ID={}不存在", accountId);
+            throw new RecordNotExistException("error.accountOutlineRole.del.notexist.accountOutline." + accountId);
+        }
+
+        long count = roleIds.stream().map(roleId -> {
+            Role role = roleService.findRoleById(roleId);
+            if (role == null) {
+                logger.error("为账号删除关联角色时，角色ID={}不存在", roleId);
+                throw new RecordNotExistException("error.accountOutlineRole.del.notexist.role." + roleId);
+            }
+            AccountOutlineRolePk pk = AccountOutlineRolePk.of(accountId, roleId);
+            accountOutlineRoleRepository.deleteById(pk);
+            return pk;
+        }).count();
+        logger.info("总共为帐号删除{}个角色", count);
+
+        accountOutlineService.clearPermissionCodeCache(accountId);
+        return (int) count;
     }
 
     /**
@@ -89,9 +203,40 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @return 删除角色个数
      */
     @Override
+    @Transactional
     public int deleteByAccountOutlineId(Long accountOutlineId) {
-        // TODO Auto-generated method stub
-        return 0;
+        logger.info("删除帐号ID={}的所有关联角色", accountOutlineId);
+        if (accountOutlineService.findAccountOutlineByAccountId(accountOutlineId) == null) {
+            logger.error("删除帐号ID={}所有关联角色时，帐号不存在", accountOutlineId);
+            throw new RecordNotExistException("error.accountOutlineRole.del.notexist.accountOutline." + accountOutlineId);
+        }
+        int count = accountOutlineRoleRepository.deleteByAccountOutlineId(accountOutlineId);
+
+        accountOutlineService.clearPermissionCodeCache(accountOutlineId);
+        return count;
+    }
+
+    /**
+     * 解除角色关联的帐号列表， 并删除相关账号权限码缓存
+     *
+     * @param roleId     角色Id
+     * @param accountIds 帐号列表
+     * @return 删除关联帐号个数
+     */
+    @Override
+    @Transactional
+    public int deleteRoleAccountOutlineList(Integer roleId, List<Long> accountIds) {
+        logger.info("开始删除角色ID={}的关联帐号列表{}", roleId, accountIds);
+        if (accountIds.isEmpty() || roleService.findRoleById(roleId) == null) {
+            logger.error("删除角色的关联帐号列表时，角色或帐号列表为空");
+            throw new RecordNotExistException("error.accountOutlineRole.del.notexist");
+        }
+        long count = accountIds.stream().map(accountId -> {
+            AccountOutlineRolePk pk = AccountOutlineRolePk.of(accountId, roleId);
+            return deleteByPrimaryKey(pk);
+        }).count();
+        logger.info("共删除角色的{}个关联帐号列表", count);
+        return (int) count;
     }
 
     /**
@@ -101,9 +246,21 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @return 删除关联关系个数
      */
     @Override
+    @Transactional
     public int deleteByRoleId(Integer roleId) {
-        // TODO Auto-generated method stub
-        return 0;
+        if (roleService.findRoleById(roleId) == null) {
+            logger.error("删除角色ID={}的所有关联帐号时，角色不存在", roleId);
+            throw new RecordNotExistException("error.accountOutlineRole.del.notexist.role." + roleId);
+        }
+        List<Long> accountIdList = accountOutlineRoleRepository.findAccountOutlineIdListByRoleId(roleId);
+
+        int count = accountOutlineRoleRepository.deleteByRoleId(roleId);
+
+        accountIdList.forEach(accountId ->
+                accountOutlineService.clearPermissionCodeCache(accountId));
+
+        logger.info("共删除角色-帐号关联关系{}对", count);
+        return count;
     }
 
     /**
@@ -113,9 +270,19 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @return
      */
     @Override
-    public int countByAccountOutlineId(Long accountOutlineId) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int countRolesByAccountOutlineId(Long accountOutlineId) {
+        return accountOutlineRoleRepository.countRolesByAccountOutlineId(accountOutlineId);
+    }
+
+    /**
+     * 查询帐号未关联的角色个数
+     *
+     * @param accountOutlineId
+     * @return
+     */
+    @Override
+    public int countRolesByNotAccountOutlineId(Long accountOutlineId) {
+        return accountOutlineRoleRepository.countRoleByNotAccountOutlineId(accountOutlineId);
     }
 
     /**
@@ -125,9 +292,8 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @return
      */
     @Override
-    public int countByRoleId(Integer roleId) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int countAccountOutlinesByRoleId(Integer roleId) {
+        return accountOutlineRoleRepository.countAccountOutlinesByRoleId(roleId);
     }
 
     /**
@@ -137,9 +303,8 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      * @return
      */
     @Override
-    public int countByNotRoleId(Integer roleId) {
-        // TODO Auto-generated method stub
-        return 0;
+    public int countAccountOutlinesByNotRoleId(Integer roleId) {
+        return accountOutlineRoleRepository.countAccountOutlinesByNotRoleId(roleId);
     }
 
     /**
@@ -169,15 +334,14 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
     }
 
     /**
-     * 查询某角色与帐号的所有关联关系
+     * 查询拥有某角色的帐号ID列表
      *
      * @param roleId 角色Id
-     * @return 角色-帐号关联关系列表
+     * @return
      */
     @Override
-    public List<AccountOutlineRole> findByRoleId(Integer roleId) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<Long> findAccountOutlineIdListByRoleId(Integer roleId) {
+        return accountOutlineRoleRepository.findAccountOutlineIdListByRoleId(roleId);
     }
 
     /**
@@ -188,8 +352,8 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      */
     @Override
     public List<Role> findRolesByAccountId(Long accountId) {
-        // TODO Auto-generated method stub
-        return null;
+        List<Integer> roleIdList = accountOutlineRoleRepository.findRoleIdListByAccountOutlineId(accountId);
+        return roleService.findRolesByIdList(roleIdList);
     }
 
     /**
@@ -200,7 +364,7 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      */
     @Override
     public List<Role> findRolesNotAttachAccount(Long accountId) {
-        // TODO Auto-generated method stub
-        return null;
+        List<Integer> roleIdList = accountOutlineRoleRepository.findRoleIdListByAccountOutlineIdIsNot(accountId);
+        return roleService.findRolesByIdList(roleIdList);
     }
 }
