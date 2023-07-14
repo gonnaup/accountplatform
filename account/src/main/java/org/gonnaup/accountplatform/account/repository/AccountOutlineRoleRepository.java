@@ -3,6 +3,7 @@ package org.gonnaup.accountplatform.account.repository;
 import org.gonnaup.accountplatform.account.entity.AccountOutlineRole;
 import org.gonnaup.accountplatform.account.entity.AccountOutlineRolePk;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,20 +13,32 @@ public interface AccountOutlineRoleRepository extends JpaRepository<AccountOutli
 
 
     /**
-     * 查询某帐号的所有关联权限列表
+     * 查询某帐号的所有关联角色ID列表
      *
      * @param accountOutlineId 帐号Id
      * @return 帐号的关联角色列表
      */
-    List<AccountOutlineRole> findByAccountOutlineId(Long accountOutlineId);
+    @Query("select t.roleId from AccountOutlineRole t where t.accountOutlineId = ?1")
+    List<Integer> findRoleIdListByAccountOutlineId(Long accountOutlineId);
+
 
     /**
-     * 查询某角色关联的帐号列表
+     * 查询某帐号未拥有的角色Id列表
+     *
+     * @param accountOutlineId
+     * @return
+     */
+    @Query("select distinct t.roleId from AccountOutlineRole t where t.accountOutlineId != ?1")
+    List<Integer> findRoleIdListByAccountOutlineIdIsNot(Long accountOutlineId);
+
+    /**
+     * 查询某角色关联的帐号Id列表
      *
      * @param roleId 角色Id
-     * @return 角色关联的帐号列表
+     * @return 角色关联的帐号Id列表
      */
-    List<AccountOutlineRole> findByRoleId(Integer roleId);
+    @Query("select t.accountOutlineId from AccountOutlineRole t where t.roleId = ?1")
+    List<Long> findAccountOutlineIdListByRoleId(Integer roleId);
 
 
     /**
@@ -34,7 +47,10 @@ public interface AccountOutlineRoleRepository extends JpaRepository<AccountOutli
      * @param accountOutlineId 帐号Id
      * @return 帐号关联角色个数
      */
-    int countByAccountOutlineId(Long accountOutlineId);
+    int countRolesByAccountOutlineId(Long accountOutlineId);
+
+    @Query("select count(*) from (select DISTINCT t.roleId from AccountOutlineRole t where t.accountOutlineId != ?1) as T")
+    int countRoleByNotAccountOutlineId(Long accountOutlineId);
 
     /**
      * 统计某角色关联的帐号个数
@@ -42,6 +58,17 @@ public interface AccountOutlineRoleRepository extends JpaRepository<AccountOutli
      * @param roleId
      * @return
      */
-    long countByRoleId(Integer roleId);
+    int countAccountOutlinesByRoleId(Integer roleId);
 
+    /**
+     * 统计没有和某角色关联的帐号个数
+     *
+     * @param roleId
+     */
+    @Query("select count(*) from (select DISTINCT t.accountOutlineId from AccountOutlineRole t where t.roleId != ?1) as T")
+    int countAccountOutlinesByNotRoleId(Integer roleId);
+
+    int deleteByAccountOutlineId(Long accountOutlineId);
+
+    int deleteByRoleId(Integer roleId);
 }
