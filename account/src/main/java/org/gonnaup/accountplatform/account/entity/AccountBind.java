@@ -1,21 +1,20 @@
 package org.gonnaup.accountplatform.account.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * 账号绑定的第三方凭证
+ * 账号绑定的第三方凭证，同种类型的凭证每个帐号
  *
  * @author gonnaup
  * @version created at 2023/7/14 19:01
  */
 @Entity
-@Table(name = "t_account_bind")
+@Table(name = "t_account_bind",
+        indexes = {@Index(name = "idx_account_bind_bindtype_principal", columnList = "bind_type, principal", unique = true),
+                @Index(name = "idx_account_bind_accountid", columnList = "account_id")})
 public class AccountBind extends TimedEntity {
     @Id
     private Long id;

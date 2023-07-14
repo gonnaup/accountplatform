@@ -19,6 +19,22 @@ public abstract class TimedEntity {
     @Column(name = "update_time")
     protected LocalDateTime updateTime;
 
+    /**
+     * 将创建时间和更新时间都设置成现在时间
+     */
+    public void setBothTimeToNow() {
+        LocalDateTime now = LocalDateTime.now();
+        createTime = now;
+        updateTime = now;
+    }
+
+    /**
+     * 将更新时间设置成现在时间
+     */
+    public void setUpdateTimeToNow() {
+
+    }
+
     public LocalDateTime getCreateTime() {
         return createTime;
     }
