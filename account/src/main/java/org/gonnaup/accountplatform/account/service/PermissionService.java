@@ -16,6 +16,8 @@ public interface PermissionService {
 
     /**
      * 添加权限
+     * <p>
+     * 权限位为null时自动填充
      *
      * @param permission
      * @return 添加的权限对象

@@ -7,6 +7,7 @@ import org.gonnaup.accountplatform.account.repository.PermissionRepository;
 import org.gonnaup.accountplatform.account.service.IdentifyGenerateService;
 import org.gonnaup.accountplatform.account.service.PermissionService;
 import org.gonnaup.accountplatform.account.util.AuthUtil;
+import org.gonnaup.common.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +47,8 @@ public class PermissionServiceImpl implements PermissionService {
      * 添加权限
      * <p>
      * 权限位必须系统生成，防止权限位不连续造成权限位浪费
+     * <p>
+     * 权限位为null时自动填充
      *
      * @param permission
      * @return 添加的权限对象
@@ -57,12 +59,12 @@ public class PermissionServiceImpl implements PermissionService {
     public Permission addPermission(Permission permission) {
         Integer id = identifyGenerateService.generateAuthId();
         permission.setId(id);// set Id
-        LocalDateTime time = LocalDateTime.now();
-        permission.setCreateTime(time);
-        permission.setUpdateTime(time);
+        permission.setBothTimeToNow();
         int nextPermissionLocation = generateNextPermissionLocation();
         //权限位检查
-        if (nextPermissionLocation != permission.getPermissionLocation()) {
+        if (permission.getPermissionLocation() == null) {
+            permission.setPermissionLocation(nextPermissionLocation);
+        } else if (nextPermissionLocation != permission.getPermissionLocation()) {
             logger.error("添加权限时权限位不正确，需要{}, 实际 {}", nextPermissionLocation, permission.getPermissionLocation());
             throw new IllegalArgumentException(String.format("权限位参数错误，需要 %d，实际 %d", nextPermissionLocation, permission.getPermissionLocation()));
         }
@@ -89,11 +91,13 @@ public class PermissionServiceImpl implements PermissionService {
         if (op.isEmpty()) {
             return null;
         }
+        logger.info("更新权限ID={}", permission.getId());
         Permission p = op.get();
-        p.setPermissionName(permission.getPermissionName());
-        p.setPermissionLocalName(permission.getPermissionLocalName());
-        p.setResources(permission.getResources());
-        p.setDescription(permission.getDescription());
+        StringUtil.acceptWhenNotBlank(p::setPermissionName, permission::getPermissionName);
+        StringUtil.acceptWhenNotBlank(p::setPermissionLocalName, permission::getPermissionLocalName);
+        StringUtil.acceptWhenNotBlank(p::setResources, permission::getResources);
+        StringUtil.acceptWhenNotBlank(p::setDescription, permission::getDescription);
+        p.setUpdateTimeToNow();
         return permissionRepository.save(p);
     }
 
@@ -124,7 +128,8 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     @Transactional
     public int generateNextPermissionLocation() {
-        return permissionRepository.findNextPermissionLocation();
+        Integer nextPermissionLocation = permissionRepository.findNextPermissionLocation();
+        return nextPermissionLocation == null ? 1 : nextPermissionLocation;
     }
 
     /**

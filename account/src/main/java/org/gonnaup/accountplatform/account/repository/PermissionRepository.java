@@ -20,7 +20,7 @@ public interface PermissionRepository extends JpaRepository<Permission, Integer>
      * @return
      */
     @Query("select MAX(p.permissionLocation) + 1 from Permission p")
-    int findNextPermissionLocation();
+    Integer findNextPermissionLocation();
 
 
 }
