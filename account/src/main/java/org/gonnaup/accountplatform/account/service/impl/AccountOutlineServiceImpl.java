@@ -8,9 +8,10 @@ import org.gonnaup.accountplatform.account.entity.AccountOutline;
 import org.gonnaup.accountplatform.account.entity.Role;
 import org.gonnaup.accountplatform.account.exception.RecordNotExistException;
 import org.gonnaup.accountplatform.account.repository.AccountOutlineRepository;
-import org.gonnaup.accountplatform.account.service.AccountOutlineRoleService;
+import org.gonnaup.accountplatform.account.repository.AccountOutlineRoleRepository;
 import org.gonnaup.accountplatform.account.service.AccountOutlineService;
 import org.gonnaup.accountplatform.account.service.IdentifyGenerateService;
+import org.gonnaup.accountplatform.account.service.RoleService;
 import org.gonnaup.accountplatform.account.util.AuthUtil;
 import org.gonnaup.common.util.RandomUtil;
 import org.gonnaup.common.util.StringUtil;
@@ -44,14 +45,19 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
 
     private final AccountOutlineRepository accountOutlineRepository;
 
-    private final AccountOutlineRoleService accountOutlineRoleService;
+    //防止循环依赖引入repository
+    private final AccountOutlineRoleRepository accountOutlineRoleRepository;
+
+    private final RoleService roleService;
 
     @Autowired
-    public AccountOutlineServiceImpl(AccountProperties accountProperties, IdentifyGenerateService identifyGenerateService, AccountOutlineRepository accountOutlineRepository, AccountOutlineRoleService accountOutlineRoleService) {
+    public AccountOutlineServiceImpl(AccountProperties accountProperties, IdentifyGenerateService identifyGenerateService, AccountOutlineRepository accountOutlineRepository,
+                                     AccountOutlineRoleRepository accountOutlineRoleRepository, RoleService roleService) {
         this.accountProperties = accountProperties;
         this.identifyGenerateService = identifyGenerateService;
         this.accountOutlineRepository = accountOutlineRepository;
-        this.accountOutlineRoleService = accountOutlineRoleService;
+        this.accountOutlineRoleRepository = accountOutlineRoleRepository;
+        this.roleService = roleService;
     }
 
     /**
@@ -252,7 +258,9 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
             logger.error("要计算权限码的帐号ID={} 不存在", id);
             throw new RecordNotExistException("error.accountOutline.search.notexist.id." + id);
         }
-        List<Role> roles = accountOutlineRoleService.findRolesByAccountId(id);
+//        List<Role> roles = accountOutlineRoleService.findRolesByAccountId(id);
+        List<Integer> roleIdList = accountOutlineRoleRepository.findRoleIdListByAccountOutlineId(id);
+        List<Role> roles = roleService.findRolesByIdList(roleIdList);
         if (logger.isDebugEnabled()) {
             logger.debug("查询到帐号ID={} 共有{}个角色，分别为{}", id, roles.size(), roles);
         }

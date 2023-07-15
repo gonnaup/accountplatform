@@ -18,7 +18,7 @@ public interface AccountOutlineRoleRepository extends JpaRepository<AccountOutli
      * @param accountOutlineId 帐号Id
      * @return 帐号的关联角色列表
      */
-    @Query("select t.roleId from AccountOutlineRole t where t.accountOutlineId = ?1")
+    @Query("select t.id.roleId from AccountOutlineRole t where t.id.accountOutlineId = ?1")
     List<Integer> findRoleIdListByAccountOutlineId(Long accountOutlineId);
 
 
@@ -28,7 +28,7 @@ public interface AccountOutlineRoleRepository extends JpaRepository<AccountOutli
      * @param accountOutlineId
      * @return
      */
-    @Query("select distinct t.roleId from AccountOutlineRole t where t.accountOutlineId != ?1")
+    @Query("select distinct t.id.roleId from AccountOutlineRole t where t.id.accountOutlineId != ?1")
     List<Integer> findRoleIdListByAccountOutlineIdIsNot(Long accountOutlineId);
 
     /**
@@ -37,7 +37,7 @@ public interface AccountOutlineRoleRepository extends JpaRepository<AccountOutli
      * @param roleId 角色Id
      * @return 角色关联的帐号Id列表
      */
-    @Query("select t.accountOutlineId from AccountOutlineRole t where t.roleId = ?1")
+    @Query("select t.id.accountOutlineId from AccountOutlineRole t where t.id.roleId = ?1")
     List<Long> findAccountOutlineIdListByRoleId(Integer roleId);
 
 
@@ -49,7 +49,7 @@ public interface AccountOutlineRoleRepository extends JpaRepository<AccountOutli
      */
     int countRolesByAccountOutlineId(Long accountOutlineId);
 
-    @Query("select count(*) from (select DISTINCT t.roleId from AccountOutlineRole t where t.accountOutlineId != ?1) as T")
+    @Query("select count(*) from (select DISTINCT t.id.roleId as roleId from AccountOutlineRole t where t.id.accountOutlineId != ?1) as T")
     int countRoleByNotAccountOutlineId(Long accountOutlineId);
 
     /**
@@ -65,7 +65,7 @@ public interface AccountOutlineRoleRepository extends JpaRepository<AccountOutli
      *
      * @param roleId
      */
-    @Query("select count(*) from (select DISTINCT t.accountOutlineId from AccountOutlineRole t where t.roleId != ?1) as T")
+    @Query("select count(*) from (select distinct t.id.accountOutlineId as accountId from AccountOutlineRole t where t.id.roleId != ?1) as p")
     int countAccountOutlinesByNotRoleId(Integer roleId);
 
     int deleteByAccountOutlineId(Long accountOutlineId);
