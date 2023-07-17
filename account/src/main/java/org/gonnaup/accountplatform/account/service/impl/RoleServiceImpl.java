@@ -6,6 +6,7 @@ import org.gonnaup.accountplatform.account.exception.RecordNotExistException;
 import org.gonnaup.accountplatform.account.repository.RoleRepository;
 import org.gonnaup.accountplatform.account.service.IdentifyGenerateService;
 import org.gonnaup.accountplatform.account.service.RoleService;
+import org.gonnaup.common.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -54,9 +54,7 @@ public class RoleServiceImpl implements RoleService {
         Integer id = identifyGenerateService.generateAuthId();
         role.setId(id);
         role.setPermissionCode("0");
-        LocalDateTime time = LocalDateTime.now();
-        role.setCreateTime(time);
-        role.setUpdateTime(time);
+        role.setBothTimeToNow();
         Role saved = roleRepository.save(role);
         logger.info("成功添加角色 {}", saved);
         return saved;
@@ -71,7 +69,6 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional
     public Role updateRoleExceptPermissionCode(Role role) {
-        LocalDateTime updateTime = LocalDateTime.now();
         Integer roleId = role.getId();
         Optional<Role> or = roleRepository.findById(roleId);
         if (or.isEmpty()) {
@@ -79,12 +76,12 @@ public class RoleServiceImpl implements RoleService {
             throw new RecordNotExistException("error.role.notexist." + roleId);
         }
         Role r = or.get();
-        if (!Objects.equals(r.getPermissionCode(), role.getPermissionCode())) {
-            logger.error("此api禁止更新角色的权限码字段，参数 {}", role);
-            throw new IllegalArgumentException("error.role.update.permissioncode");
-        }
-        role.setUpdateTime(updateTime);
-        r = roleRepository.save(role);
+        StringUtil.acceptWhenNotBlank(r::setRoleName, role::getRoleName);
+        StringUtil.acceptWhenNotBlank(r::setRoleLocalName, role::getRoleLocalName);
+        StringUtil.acceptWhenNotBlank(r::setDescription, role::getDescription);
+
+        r.setUpdateTimeToNow();
+        roleRepository.save(r);
         logger.info("更新角色 {} 成功", roleId);
         return r;
     }
