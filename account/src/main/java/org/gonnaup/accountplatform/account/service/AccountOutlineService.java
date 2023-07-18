@@ -50,8 +50,8 @@ public interface AccountOutlineService {
     /**
      * 更新简要信息，nickName, gender, region, personalSignature
      *
-     * @param accountOutline 更新对象
-     * @return
+     * @param accountOutline 更新参数对象
+     * @return 更新后的对象
      */
     AccountOutline updateAccountOutlineBrief(AccountOutline accountOutline);
 
@@ -109,6 +109,8 @@ public interface AccountOutlineService {
      *
      * @param id 帐号Id
      * @return 权限码
+     * <p>
+     * TODO test
      */
     String calculatePermissionCode(Long id);
 
@@ -116,6 +118,7 @@ public interface AccountOutlineService {
      * 清除账户权限码缓存
      *
      * @param id 帐号Id
+     *                     TODO test
      */
     void clearPermissionCodeCache(Long id);
 

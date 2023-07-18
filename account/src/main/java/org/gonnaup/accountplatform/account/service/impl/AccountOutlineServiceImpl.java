@@ -143,24 +143,16 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
             logger.debug("更新前账户对象 {}", aol);
             logger.debug("更新参数对象 {}", accountOutline);
         }
-        if (StringUtil.isNotBlank(accountOutline.getNickName())) {
-            aol.setNickName(accountOutline.getNickName());
-        }
-        if (StringUtil.isNotBlank(accountOutline.getGender())) {
-            aol.setGender(Gender.valueOf(accountOutline.getGender()).value);
-        }
-        if (StringUtil.isNotBlank(accountOutline.getRegion())) {
-            aol.setRegion(accountOutline.getRegion());
-        }
-        if (StringUtil.isNotBlank(accountOutline.getPersonalSignature())) {
-            aol.setPersonalSignature(accountOutline.getPersonalSignature());
-        }
-        aol.setUpdateTime(LocalDateTime.now());
-        AccountOutline saved = accountOutlineRepository.save(aol);
+        StringUtil.acceptWhenNotBlank(aol::setNickName, accountOutline::getNickName);
+        StringUtil.acceptWhenNotBlank(s -> aol.setGender(Gender.fromValue(accountOutline.getGender()).value), accountOutline::getGender);
+        StringUtil.acceptWhenNotBlank(aol::setRegion, accountOutline::getRegion);
+        StringUtil.acceptWhenNotBlank(aol::setPersonalSignature, accountOutline::getPersonalSignature);
+        aol.setUpdateTimeToNow();
+        accountOutlineRepository.save(aol);
         if (logger.isDebugEnabled()) {
-            logger.debug("更新后账户对象 {}", saved);
+            logger.debug("更新后账户对象 {}", aol);
         }
-        return saved;
+        return aol;
     }
 
     /**
@@ -173,7 +165,7 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
     @Transactional
     public int disableAccount(Long id) {
         logger.info("禁用帐号ID={}", id);
-        return accountOutlineRepository.updateAccountName(id, AccountState.Disabled.value, LocalDateTime.now());
+        return accountOutlineRepository.updateAccountState(id, AccountState.Disabled.value, LocalDateTime.now());
     }
 
     /**
@@ -285,9 +277,7 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
 
 
     private void fillRequiredFiled(AccountOutline accountOutline) {
-        LocalDateTime time = LocalDateTime.now();
-        accountOutline.setCreateTime(time);
-        accountOutline.setUpdateTime(time);
+        accountOutline.setBothTimeToNow();
         if (StringUtil.isNullOrBlank(accountOutline.getAccountName())) {
             String accountName = null;
             while (accountOutlineRepository.findByAccountName((accountName =
@@ -298,15 +288,10 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
             logger.info("生成默认账户名 {}", accountName);
             accountOutline.setAccountName(accountName);
         }
-        if (StringUtil.isNullOrBlank(accountOutline.getGender())) {
-            accountOutline.setGender(Gender.Male.value);
-        }
-        if (StringUtil.isNullOrBlank(accountOutline.getAvatarUrl())) {
-            accountOutline.setAvatarUrl(accountProperties.getAvatar().defaultAvatarUrl());
-        }
-        if (StringUtil.isNullOrBlank(accountOutline.getState())) {
-            accountOutline.setState(AccountState.Normal.value);
-        }
+        StringUtil.acceptWhenNullOrBlank(accountOutline::setNickName, accountOutline.getAccountName(), accountOutline::getNickName);
+        StringUtil.acceptWhenNullOrBlank(accountOutline::setGender, Gender.Privacy.value, accountOutline::getGender);
+        StringUtil.acceptWhenNullOrBlank(accountOutline::setAvatarUrl, accountProperties.getAvatar().defaultAvatarUrl(), accountOutline::getAvatarUrl);
+        StringUtil.acceptWhenNullOrBlank(accountOutline::setState, AccountState.Normal.value, accountOutline::getState);
     }
 
 }
