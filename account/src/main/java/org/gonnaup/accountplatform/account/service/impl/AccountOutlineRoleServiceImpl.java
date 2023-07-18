@@ -102,7 +102,7 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
             }
             AccountOutlineRole accountOutlineRole = AccountOutlineRole.of(account, role);
             return accountOutlineRoleRepository.save(accountOutlineRole);
-        }).count();
+        }).toList().size();
         logger.info("总共为帐号关联{}个角色", count);
 
         accountOutlineService.clearPermissionCodeCache(accountId);
@@ -131,7 +131,7 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
         long count = accountIds.stream().map(accountId -> {
             AccountOutlineRolePk pk = AccountOutlineRolePk.of(accountId, roleId);
             return addAccountOutlineRole(pk);
-        }).count();
+        }).toList().size();
         logger.info("总共为角色ID={}关联{}个帐号", roleId, count);
         return (int) count;
     }
@@ -189,7 +189,7 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
             AccountOutlineRolePk pk = AccountOutlineRolePk.of(accountId, roleId);
             accountOutlineRoleRepository.deleteById(pk);
             return pk;
-        }).count();
+        }).toList().size();
         logger.info("总共为帐号删除{}个角色", count);
 
         accountOutlineService.clearPermissionCodeCache(accountId);
@@ -234,7 +234,7 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
         long count = accountIds.stream().map(accountId -> {
             AccountOutlineRolePk pk = AccountOutlineRolePk.of(accountId, roleId);
             return deleteByPrimaryKey(pk);
-        }).count();
+        }).toList().size();
         logger.info("共删除角色的{}个关联帐号列表", count);
         return (int) count;
     }

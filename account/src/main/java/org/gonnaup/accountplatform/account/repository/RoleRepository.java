@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Integer> {
@@ -14,5 +15,7 @@ public interface RoleRepository extends JpaRepository<Role, Integer> {
     @Modifying(clearAutomatically = true)
     @Query("update Role r set r.permissionCode = ?2, r.updateTime = ?3 where r.id = ?1")
     int updatePermissionCodeOfRole(Integer roleId, String permissionCode, LocalDateTime updateTime);
+
+    List<Role> findByIdNotIn(List<Integer> roleIdList);
 
 }

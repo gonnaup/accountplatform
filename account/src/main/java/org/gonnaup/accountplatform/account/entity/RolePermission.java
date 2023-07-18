@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Role/Permission关联关系实体类
@@ -46,6 +47,14 @@ public class RolePermission {
 
     public static RolePermission of(Role role, Permission permission) {
         return new RolePermission(RolePermissionPk.of(role.getId(), permission.getId()), role, permission);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RolePermission.class.getSimpleName() + "[", "]")
+                .add("roleId=" + id.getRoleId())
+                .add("permissionId=" + id.getPermissionId())
+                .toString();
     }
 
     @Override

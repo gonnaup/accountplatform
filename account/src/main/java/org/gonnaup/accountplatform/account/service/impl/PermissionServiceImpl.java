@@ -64,8 +64,8 @@ public class PermissionServiceImpl implements PermissionService {
         //权限位检查
         if (permission.getPermissionLocation() == null) {
             permission.setPermissionLocation(nextPermissionLocation);
-        } else if (nextPermissionLocation != permission.getPermissionLocation()) {
-            logger.error("添加权限时权限位不正确，需要{}, 实际 {}", nextPermissionLocation, permission.getPermissionLocation());
+        } else if (permission.getPermissionLocation() > nextPermissionLocation) {
+            logger.error("添加权限时权限位不正确，需要小于等于 {}, 实际 {}", nextPermissionLocation, permission.getPermissionLocation());
             throw new IllegalArgumentException(String.format("权限位参数错误，需要 %d，实际 %d", nextPermissionLocation, permission.getPermissionLocation()));
         }
         //生成权限码
@@ -152,6 +152,17 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public List<Permission> findPermissionsByIdList(List<Integer> permissionIds) {
         return permissionRepository.findAllById(permissionIds);
+    }
+
+    /**
+     * 查询Id不在权限id列表中的权限列表
+     *
+     * @param permissionIdList id list，为Empty时返回所有权限
+     * @return 不在permissionIds中的权限列表
+     */
+    @Override
+    public List<Permission> findPermissionsByIdNotInLIst(List<Integer> permissionIdList) {
+        return permissionIdList.isEmpty() ? permissionRepository.findAll() : permissionRepository.findByIdNotIn(permissionIdList);
     }
 
     /**

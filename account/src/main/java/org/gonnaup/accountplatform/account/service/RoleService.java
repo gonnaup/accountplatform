@@ -73,6 +73,14 @@ public interface RoleService {
     List<Role> findRolesByIdList(List<Integer> roleIdList);
 
     /**
+     * 查询不在id列表中的角色
+     *
+     * @param roleIdList id列表，为Empty时返回所有角色
+     * @return 不在指定id列表中的角色
+     */
+    List<Role> findRolesByIdNotInList(List<Integer> roleIdList);
+
+    /**
      * 查询所有角色
      *
      * @return

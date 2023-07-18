@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Integer> {
 
@@ -21,6 +23,8 @@ public interface PermissionRepository extends JpaRepository<Permission, Integer>
      */
     @Query("select MAX(p.permissionLocation) + 1 from Permission p")
     Integer findNextPermissionLocation();
+
+    List<Permission> findByIdNotIn(List<Integer> permissionIdList);
 
 
 }

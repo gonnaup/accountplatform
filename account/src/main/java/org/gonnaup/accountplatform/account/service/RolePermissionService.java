@@ -38,7 +38,7 @@ public interface RolePermissionService {
      *
      * @param roleId       角色ID
      * @param permissionId 权限ID
-     * @return 添加的对象
+     * @return 添加的对象，已存在返回null
      */
     RolePermission addRolePermission(RolePermissionPk rolePermissionPk);
 

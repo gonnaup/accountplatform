@@ -72,6 +72,7 @@ class RoleServiceTest {
         role.setRoleLocalName(RandomUtil.randomString(8));
         roleService.updateRoleExceptPermissionCode(role);
         roleRepository.flush();
+        assertTrue(roleService.findRolesByIdNotInList(List.of(role.getId())).isEmpty());
         Role roleById = roleService.findRoleById(r1.getId());
         assertEquals(role.getRoleName(), roleById.getRoleName());
         assertEquals(role.getRoleLocalName(), roleById.getRoleLocalName());

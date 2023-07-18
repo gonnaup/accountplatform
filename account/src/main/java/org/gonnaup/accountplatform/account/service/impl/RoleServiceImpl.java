@@ -163,6 +163,17 @@ public class RoleServiceImpl implements RoleService {
     }
 
     /**
+     * 查询不在id列表中的角色
+     *
+     * @param roleIdList id列表，为Empty时返回所有角色
+     * @return 不在指定id列表中的角色
+     */
+    @Override
+    public List<Role> findRolesByIdNotInList(List<Integer> roleIdList) {
+        return roleIdList.isEmpty() ? roleRepository.findAll() : roleRepository.findByIdNotIn(roleIdList);
+    }
+
+    /**
      * 查询所有角色
      *
      * @return

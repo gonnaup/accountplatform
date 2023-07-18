@@ -66,6 +66,14 @@ public interface PermissionService {
     List<Permission> findPermissionsByIdList(List<Integer> permissionIds);
 
     /**
+     * 查询Id不在权限id列表中的权限列表
+     *
+     * @param permissionIds id list，为Empty时返回所有权限
+     * @return 不在permissionIds中的权限列表
+     */
+    List<Permission> findPermissionsByIdNotInLIst(List<Integer> permissionIds);
+
+    /**
      * 获取所有权限列表
      *
      * @return 所有权限列表

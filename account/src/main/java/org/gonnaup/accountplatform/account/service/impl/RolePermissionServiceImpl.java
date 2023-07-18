@@ -1,6 +1,9 @@
 package org.gonnaup.accountplatform.account.service.impl;
 
-import org.gonnaup.accountplatform.account.entity.*;
+import org.gonnaup.accountplatform.account.entity.Permission;
+import org.gonnaup.accountplatform.account.entity.Role;
+import org.gonnaup.accountplatform.account.entity.RolePermission;
+import org.gonnaup.accountplatform.account.entity.RolePermissionPk;
 import org.gonnaup.accountplatform.account.exception.RecordNotExistException;
 import org.gonnaup.accountplatform.account.repository.RolePermissionRepository;
 import org.gonnaup.accountplatform.account.service.*;
@@ -88,12 +91,17 @@ public class RolePermissionServiceImpl implements RolePermissionService {
      * 添加关联对象，如果有权限缓存，需删除关联缓存
      *
      * @param rolePermissionPk@return 添加的对象
+     * @return 成功添加返回添加的实体类，已存在返回null
      */
     @Override
     @Transactional
     public RolePermission addRolePermission(RolePermissionPk rolePermissionPk) {
         Integer roleId = rolePermissionPk.getRoleId();
         Integer permissionId = rolePermissionPk.getPermissionId();
+        if (rolePermissionRepository.findById(rolePermissionPk).isPresent()) {
+            logger.warn("角色-权限关联关系 {} 已存在，不再重复添加", rolePermissionPk);
+            return null;
+        }
         logger.info("开始添加角色[{}]-权限[{}]关联关系...", roleId, permissionId);
         Role role = roleService.findRoleById(roleId);
         Permission permission = permissionService.findPermissionById(permissionId);
@@ -139,7 +147,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
             logger.error("为角色批量添加权限关联对象时，角色ID={}不存在", roleId);
             throw new RecordNotExistException("error.rolepermission.role.notexist." + roleId);
         }
-        //添加关联关系并返回权限码集合，如果权限已关联此角色，
+        //添加关联关系并返回权限码集合，如果权限已关联此角色，则保持关联关系
         List<String> pCodeList = permissionIds.stream().map(pId -> {
             Permission p = permissionService.findPermissionById(pId);
             if (p == null) {
@@ -175,10 +183,11 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Transactional
     public int permissionAttachRoles(Integer permissionId, List<Integer> roleIds) {
         logger.info("开始为权限ID[{}]绑定角色列表ID[{}]...", permissionId, roleIds);
-        int count = (int) roleIds.stream().map(roleId -> {
+        roleIds.forEach(roleId -> {
             RolePermissionPk pk = RolePermissionPk.of(roleId, permissionId);
-            return addRolePermission(pk);
-        }).count();
+            addRolePermission(pk);
+        });
+        int count = roleIds.size();
         logger.info("为权限ID[{}]成功绑定{}个角色对象", permissionId, count);
         return count;
     }
@@ -232,6 +241,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
         List<String> permissionsCodeList = permissionIds.stream().map(permissionId -> {
             RolePermissionPk pk = RolePermissionPk.of(roleId, permissionId);
             rolePermissionRepository.deleteById(pk);
+            rolePermissionRepository.flush();//TODO
             return permissionService.findPermissionCode(permissionId);
         }).filter(Objects::nonNull).toList();
 
@@ -262,11 +272,11 @@ public class RolePermissionServiceImpl implements RolePermissionService {
         long count = roleIds.stream().map(roleId -> RolePermissionPk.of(roleId, permissionId))
                 .filter(pk -> {
                     if (rolePermissionRepository.findById(pk).isEmpty()) {
-                        logger.warn("角色-权限关联对象 {} 不存在", pk);
+                        logger.warn("角色-权限关联对象 {} 不存在，跳过删除步骤", pk);
                         return false;
                     }
                     return true;
-                }).map(pk -> deleteByPrimaryKey(pk)).count();
+                }).map(pk -> deleteByPrimaryKey(pk)).toList().size();//使用.count()方法后map方法不会执行！！！
         logger.info("共删除权限[{}]关联的角色 {} 个", permissionId, count);
         return (int) count;
     }
@@ -288,6 +298,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
         }
         logger.info("查询到角色[{}]关联权限共 {} 个，开始删除关联关系", roleId, rp.size());
         List<RolePermissionPk> pkList = rp.stream().map(RolePermission::getId).toList();
+        rolePermissionRepository.flush();
         rolePermissionRepository.deleteAllByIdInBatch(pkList);
 
         String zeroPermissionCode = "0";
@@ -331,14 +342,12 @@ public class RolePermissionServiceImpl implements RolePermissionService {
         logger.info("开始重新配置角色[{}]关联的权限列表 {}", roleId, permissionIds);
         logger.info("开始删除角色[{}]所有关联权限...", roleId);
         List<RolePermission> rp = rolePermissionRepository.findByRoleId(roleId);
-        if (rp.isEmpty()) {
-            logger.warn("查询到角色[{}]没有关联权限，无需执行删除操作", roleId);
-            return 0;
+        if (!rp.isEmpty()) {
+            logger.info("查询到角色[{}]关联权限共 {} 个，开始删除关联关系", roleId, rp.size());
+            List<RolePermissionPk> pkList = rp.stream().map(RolePermission::getId).toList();
+            rolePermissionRepository.flush();
+            rolePermissionRepository.deleteAllByIdInBatch(pkList);
         }
-        logger.info("查询到角色[{}]关联权限共 {} 个，开始删除关联关系", roleId, rp.size());
-        List<RolePermissionPk> pkList = rp.stream().map(RolePermission::getId).toList();
-        rolePermissionRepository.deleteAllByIdInBatch(pkList);
-
         return roleAttachPermissions(roleId, permissionIds);
     }
 
@@ -388,7 +397,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
      */
     @Override
     public List<Permission> findPermissionsNotAttachRole(Integer roleId) {
-        return permissionService.findPermissionsByIdList(rolePermissionRepository.findByRoleIdIsNot(roleId).stream()
+        return permissionService.findPermissionsByIdNotInLIst(rolePermissionRepository.findByRoleId(roleId).stream()
                 .map(rolePermission -> rolePermission.getId().getPermissionId()).toList());
     }
 
@@ -423,7 +432,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
      */
     @Override
     public List<Role> findRolesNotAttachPermission(Integer permissionId) {
-        return roleService.findRolesByIdList(rolePermissionRepository.findByPermissionIdIsNot(permissionId).stream()
+        return roleService.findRolesByIdNotInList(rolePermissionRepository.findByPermissionId(permissionId).stream()
                 .map(rolePermission -> rolePermission.getId().getRoleId()).toList());
     }
 

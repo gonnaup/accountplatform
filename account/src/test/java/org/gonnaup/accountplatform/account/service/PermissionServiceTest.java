@@ -80,6 +80,7 @@ public class PermissionServiceTest {
         assertNotNull(permissionService.findPermissionById(p1.getId()));
         permissionService.addPermission(p2);
         permissionService.addPermission(p3);
+        assertEquals(2, permissionService.findPermissionsByIdNotInLIst(List.of(p1.getId())).size());
 
         //update
         String NEW_NAME = "TEST_P1_NAME_5839";
