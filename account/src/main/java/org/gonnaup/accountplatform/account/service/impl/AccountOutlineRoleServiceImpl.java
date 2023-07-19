@@ -98,7 +98,8 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
             Role role = roleService.findRoleById(roleId);
             if (role == null) {
                 logger.error("为账号添加关联角色时，角色ID={}不存在", roleId);
-                throw new RecordNotExistException("error.accountOutlineRole.add.role.notexist." + roleId);
+                throw new RecordNotExistException(
+                        "error.accountOutlineRole.add.role.notexist." + roleId);
             }
             AccountOutlineRole accountOutlineRole = AccountOutlineRole.of(account, role);
             return accountOutlineRoleRepository.save(accountOutlineRole);
@@ -282,7 +283,8 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      */
     @Override
     public int countRolesByNotAccountOutlineId(Long accountOutlineId) {
-        return accountOutlineRoleRepository.countRoleByNotAccountOutlineId(accountOutlineId);
+        List<Integer> roleIdList = accountOutlineRoleRepository.findRoleIdListByAccountOutlineId(accountOutlineId);
+        return roleIdList.isEmpty() ? roleService.findAll().size() : roleService.findRolesByIdNotInList(roleIdList).size();
     }
 
     /**
@@ -304,7 +306,8 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      */
     @Override
     public int countAccountOutlinesByNotRoleId(Integer roleId) {
-        return accountOutlineRoleRepository.countAccountOutlinesByNotRoleId(roleId);
+        List<Long> accountIdList = accountOutlineRoleRepository.findAccountOutlineIdListByRoleId(roleId);
+        return accountOutlineService.countByIdNotIn(accountIdList);
     }
 
     /**
@@ -316,8 +319,8 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      */
     @Override
     public GenericPage<AccountOutline> findAccountOutlinesByRoleIdPaged(Integer roleId, Pageable pageable) {
-        // TODO Auto-generated method stub
-        return null;
+        List<Long> accountIdList = accountOutlineRoleRepository.findAccountOutlineIdListByRoleId(roleId);
+        return accountOutlineService.findByIdIn(accountIdList, pageable);
     }
 
     /**
@@ -329,8 +332,8 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      */
     @Override
     public GenericPage<AccountOutline> findAccountOutlinesNotAttachRolePaged(Integer roleId, Pageable pageable) {
-        // TODO Auto-generated method stub
-        return null;
+        List<Long> accountIdList = accountOutlineRoleRepository.findAccountOutlineIdListByRoleId(roleId);
+        return accountOutlineService.findByIdNotIn(accountIdList, pageable);
     }
 
     /**
@@ -364,7 +367,7 @@ public class AccountOutlineRoleServiceImpl implements AccountOutlineRoleService 
      */
     @Override
     public List<Role> findRolesNotAttachAccount(Long accountId) {
-        List<Integer> roleIdList = accountOutlineRoleRepository.findRoleIdListByAccountOutlineIdIsNot(accountId);
-        return roleService.findRolesByIdList(roleIdList);
+        List<Integer> roleIdList = accountOutlineRoleRepository.findRoleIdListByAccountOutlineId(accountId);
+        return roleService.findRolesByIdNotInList(roleIdList);
     }
 }

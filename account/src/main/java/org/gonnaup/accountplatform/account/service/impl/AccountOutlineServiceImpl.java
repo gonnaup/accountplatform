@@ -18,10 +18,12 @@ import org.gonnaup.common.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,7 @@ import java.util.Optional;
  * @version created at 2023/6/30 上午12:05
  */
 @Service
+@CacheConfig(cacheNames = {"cache::accountOutline"})
 public class AccountOutlineServiceImpl implements AccountOutlineService {
 
     private static final Logger logger = LoggerFactory.getLogger(AccountOutlineServiceImpl.class);
@@ -237,13 +240,54 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
     }
 
     /**
+     * 统计Id不在accountIdList中的账号个数
+     *
+     * @param accountIdList
+     * @return 账号个数
+     */
+    @Override
+    public int countByIdNotIn(List<Long> accountIdList) {
+        return accountIdList.isEmpty() ? (int) accountOutlineRepository.count() : accountOutlineRepository.countByIdNotIn(accountIdList);
+    }
+
+    /**
+     * 分页查询账号Id不在accountIdList中的账号列表
+     *
+     * @param accountIdList
+     * @param pageable
+     * @return
+     */
+    @Override
+    public GenericPage<AccountOutline> findByIdNotIn(List<Long> accountIdList, Pageable pageable) {
+        Page<AccountOutline> page = null;
+        if (accountIdList.isEmpty()) {
+            page = accountOutlineRepository.findAll(pageable);
+        } else {
+            page = accountOutlineRepository.findByIdNotIn(accountIdList, pageable);
+        }
+        return GenericPage.fromPage(page);
+    }
+
+    /**
+     * 分页查询账号Id在accountIdList中的账号列表
+     *
+     * @param accountIdList
+     * @param pageable
+     * @return
+     */
+    @Override
+    public GenericPage<AccountOutline> findByIdIn(List<Long> accountIdList, Pageable pageable) {
+        return GenericPage.fromPage(accountOutlineRepository.findByIdIn(accountIdList, pageable));
+    }
+
+    /**
      * 计算帐号的权限码，带缓存
      *
      * @param id 帐号Id
      * @return 权限码
      */
     @Override
-    @Cacheable(key = "cache::accountOutline::permissionCode::+#a0", unless = "#result == null")
+    @Cacheable(key = "'permissionCode::'+#id", unless = "#result == null")
     public String calculatePermissionCode(Long id) {
         logger.info("开始计算帐号ID={} 的权限码", id);
         if (accountOutlineRepository.findById(id).isEmpty()) {
@@ -257,11 +301,13 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
             logger.debug("查询到帐号ID={} 共有{}个角色，分别为{}", id, roles.size(), roles);
         }
         if (roles.isEmpty()) {
-            logger.info("帐号ID={} 没有分配角色，返回权限码\"0\"", id);
-            return "0";
+            logger.info("帐号ID={} 没有分配角色，返回权限码\"{}\"", id, AuthUtil.ZERO_P_CODE);
+            return AuthUtil.ZERO_P_CODE;
         }
         List<String> permissionCodeList = roles.stream().map(Role::getPermissionCode).toList();
-        return AuthUtil.mergePermissionChainList(permissionCodeList);
+        String code = AuthUtil.mergePermissionChainList(permissionCodeList);
+        logger.info("计算账号ID={}的权限码为{}", id, code);
+        return code;
     }
 
     /**
@@ -270,7 +316,7 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
      * @param id 帐号Id
      */
     @Override
-    @CacheEvict(key = "cache::accountOutline::permissionCode::+#a0")
+    @CacheEvict(key = "'permissionCode::'+#id")
     public void clearPermissionCodeCache(Long id) {
         logger.info("成功清除帐号ID={}的权限码缓存", id);
     }

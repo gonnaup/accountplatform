@@ -4,6 +4,7 @@ import org.gonnaup.accountplatform.account.config.AccountProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
 
 /**
  * 帐号平台启动类
@@ -12,6 +13,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
  * @version created at 2023/5/31 下午7:00
  */
 @SpringBootApplication
+@EnableCaching
 @EnableConfigurationProperties({AccountProperties.class})
 public class AccountApplication {
     public static void main(String[] args) {

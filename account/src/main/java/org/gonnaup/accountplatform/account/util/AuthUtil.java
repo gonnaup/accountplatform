@@ -27,6 +27,9 @@ public class AuthUtil {
      */
     private static final int LONG_MAX_PERMISSION_BIT = 63;
 
+    //无任何权限时的权限码
+    public static final String ZERO_P_CODE = "0";
+
     // 权限链分隔符
     private static final String PERMISSION_CHAIN_SPLITER = "#";
 
@@ -62,7 +65,7 @@ public class AuthUtil {
             }
 
             String lastChain = Long.toHexString(1L << (loc - 1));
-            String emptyCode = '0' + PERMISSION_CHAIN_SPLITER;
+            String emptyCode = ZERO_P_CODE + PERMISSION_CHAIN_SPLITER;
             return emptyCode.repeat(chainN) + lastChain;
         }
     }

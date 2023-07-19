@@ -5,6 +5,8 @@ import org.gonnaup.accountplatform.account.domain.GenericPage;
 import org.gonnaup.accountplatform.account.entity.AccountOutline;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * 帐号概要信息服务接口
  *
@@ -104,6 +106,33 @@ public interface AccountOutlineService {
      */
     boolean accountNameExist(String accountName);
 
+
+    /**
+     * 统计Id不在accountIdList中的账号个数
+     *
+     * @param accountIdList
+     * @return 账号个数
+     */
+    int countByIdNotIn(List<Long> accountIdList);
+
+    /**
+     * 分页查询账号Id不在accountIdList中的账号列表
+     *
+     * @param accountId
+     * @param pageable
+     * @return
+     */
+    GenericPage<AccountOutline> findByIdNotIn(List<Long> accountIdList, Pageable pageable);
+
+    /**
+     * 分页查询账号Id在accountIdList中的账号列表
+     *
+     * @param accountIdList
+     * @param pageable
+     * @return
+     */
+    GenericPage<AccountOutline> findByIdIn(List<Long> accountIdList, Pageable pageable);
+
     /**
      * 计算帐号的权限码，带缓存
      *
@@ -118,7 +147,7 @@ public interface AccountOutlineService {
      * 清除账户权限码缓存
      *
      * @param id 帐号Id
-     *                     TODO test
+     *                                                                                           TODO test
      */
     void clearPermissionCodeCache(Long id);
 
