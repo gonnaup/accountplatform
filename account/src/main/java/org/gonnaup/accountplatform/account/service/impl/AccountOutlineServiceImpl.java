@@ -148,8 +148,8 @@ public class AccountOutlineServiceImpl implements AccountOutlineService {
         }
         StringUtil.acceptWhenNotBlank(aol::setNickName, accountOutline::getNickName);
         StringUtil.acceptWhenNotBlank(s -> aol.setGender(Gender.fromValue(accountOutline.getGender()).value), accountOutline::getGender);
-        StringUtil.acceptWhenNotBlank(aol::setRegion, accountOutline::getRegion);
-        StringUtil.acceptWhenNotBlank(aol::setPersonalSignature, accountOutline::getPersonalSignature);
+        aol.setRegion(accountOutline.getRegion());
+        aol.setPersonalSignature(accountOutline.getPersonalSignature());
         aol.setUpdateTimeToNow();
         accountOutlineRepository.save(aol);
         if (logger.isDebugEnabled()) {

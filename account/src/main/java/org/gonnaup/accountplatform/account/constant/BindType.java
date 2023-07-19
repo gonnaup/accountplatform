@@ -15,12 +15,13 @@ import java.util.Map;
  */
 public enum BindType {
 
-    Email("E", "邮箱");
-    //    Phone("P", "手机号码"),
-//    WeChat("W", "微信"),
-//    QQ("Q", "QQ"),
-//    Github("G", "Github"),
-//    AliPay("A", "支付宝");
+    Email("E", "邮箱"),
+    Phone("P", "手机号码"),
+    WeChat("W", "微信"),
+    QQ("Q", "QQ"),
+    Github("G", "Github"),
+    AliPay("A", "支付宝");
+
     public final String value;
 
     public final String label;

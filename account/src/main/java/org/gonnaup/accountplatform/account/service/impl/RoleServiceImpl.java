@@ -78,7 +78,7 @@ public class RoleServiceImpl implements RoleService {
         Role r = or.get();
         StringUtil.acceptWhenNotBlank(r::setRoleName, role::getRoleName);
         StringUtil.acceptWhenNotBlank(r::setRoleLocalName, role::getRoleLocalName);
-        StringUtil.acceptWhenNotBlank(r::setDescription, role::getDescription);
+        r.setDescription(role.getDescription());
 
         r.setUpdateTimeToNow();
         roleRepository.save(r);

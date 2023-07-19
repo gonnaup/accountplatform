@@ -95,8 +95,8 @@ public class PermissionServiceImpl implements PermissionService {
         Permission p = op.get();
         StringUtil.acceptWhenNotBlank(p::setPermissionName, permission::getPermissionName);
         StringUtil.acceptWhenNotBlank(p::setPermissionLocalName, permission::getPermissionLocalName);
-        StringUtil.acceptWhenNotBlank(p::setResources, permission::getResources);
-        StringUtil.acceptWhenNotBlank(p::setDescription, permission::getDescription);
+        p.setResources(permission.getResources());
+        p.setDescription(permission.getDescription());
         p.setUpdateTimeToNow();
         return permissionRepository.save(p);
     }

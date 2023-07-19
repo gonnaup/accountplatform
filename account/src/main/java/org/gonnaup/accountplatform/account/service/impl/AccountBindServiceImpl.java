@@ -57,7 +57,7 @@ public class AccountBindServiceImpl implements AccountBindService {
         }
         Long accountId = accountBind.getAccountId();
         //validate the bindType
-        BindType.valueOf(accountBind.getBindType());
+        BindType.fromValue(accountBind.getBindType());
         AccountOutline account = accountOutlineService.findAccountOutlineByAccountId(accountId);
         if (account == null) {
             logger.error("给帐号添加绑定对象时，对象ID={}不存在", accountId);
@@ -65,7 +65,7 @@ public class AccountBindServiceImpl implements AccountBindService {
         }
         accountBind.setId(identifyGenerateService.generateAccountId());
         accountBind.setBothTimeToNow();
-        accountBindRepository.save(accountBind);
+        accountBind = accountBindRepository.save(accountBind);
         logger.info("给帐号ID={}添加绑定对象 {}", accountId, accountBind);
         return accountBind;
     }
@@ -93,7 +93,7 @@ public class AccountBindServiceImpl implements AccountBindService {
         bind.setUpdateTimeToNow();
         bind.setPrincipal(accountBind.getPrincipal());
         bind.setToken(accountBind.getToken());
-        accountBindRepository.save(bind);
+        bind = accountBindRepository.save(bind);
         logger.info("更新帐号绑定对象ID={}成功", id);
         return bind;
     }
@@ -116,6 +116,17 @@ public class AccountBindServiceImpl implements AccountBindService {
         AccountBind bind = oab.get();
         logger.info("删除帐号绑定对象 {}", bind);
         return bind;
+    }
+
+    /**
+     * 根据Id查询对象
+     *
+     * @param bindId id
+     * @return AccountBind对象
+     */
+    @Override
+    public AccountBind findAccountBindById(Long bindId) {
+        return accountBindRepository.findById(bindId).orElse(null);
     }
 
     /**

@@ -38,6 +38,14 @@ public interface AccountBindService {
     AccountBind deleteAccountBindById(Long bindId);
 
     /**
+     * 根据Id查询对象
+     *
+     * @param bindId id
+     * @return AccountBind对象
+     */
+    AccountBind findAccountBindById(Long bindId);
+
+    /**
      * 查询帐号所有绑定的凭证
      *
      * @param accountId 帐号Id
