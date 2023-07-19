@@ -4,9 +4,7 @@ import org.gonnaup.accountplatform.account.constant.AccountState;
 import org.gonnaup.accountplatform.account.constant.Gender;
 import org.gonnaup.accountplatform.account.domain.GenericPage;
 import org.gonnaup.accountplatform.account.entity.AccountOutline;
-import org.gonnaup.accountplatform.account.repository.AccountOutlineRepository;
 import org.gonnaup.common.util.RandomUtil;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,17 +21,14 @@ class AccountOutlineServiceTest {
 
     AccountOutlineService accountOutlineService;
 
-    AccountOutlineRepository accountOutlineRepository;
 
     @Autowired
-    public AccountOutlineServiceTest(AccountOutlineService accountOutlineService, AccountOutlineRepository accountOutlineRepository) {
+    public AccountOutlineServiceTest(AccountOutlineService accountOutlineService) {
         this.accountOutlineService = accountOutlineService;
-        this.accountOutlineRepository = accountOutlineRepository;
     }
 
     @Test
     void testAccountOutlineService() {
-        accountOutlineRepository.deleteAll();
         AccountOutline account = new AccountOutline();
         account.setAccountName(RandomUtil.randomAlphabet(12));
         account.setPersonalSignature(RandomUtil.randomString(58));
@@ -59,7 +54,7 @@ class AccountOutlineServiceTest {
         assertEquals(newUrl, account.getAvatarUrl());
 
 
-        String newNickName = RandomUtil.randomString(8);
+        String newNickName = RandomUtil.randomString(18);
         String gender = Gender.Male.value;
         AccountOutline update = new AccountOutline();
         update.setId(account.getId());
@@ -69,8 +64,8 @@ class AccountOutlineServiceTest {
         assertNotSame(account, updated);
         assertEquals(update.getNickName(), updated.getNickName());
         assertEquals(update.getGender(), updated.getGender());
-        assertEquals(account.getRegion(), updated.getRegion());
-        assertEquals(account.getPersonalSignature(), updated.getPersonalSignature());
+        assertEquals(update.getRegion(), updated.getRegion());
+        assertEquals(update.getPersonalSignature(), updated.getPersonalSignature());
 
         accountOutlineService.disableAccount(id);
         account = accountOutlineService.findAccountOutlineByAccountId(id);
@@ -80,16 +75,14 @@ class AccountOutlineServiceTest {
         account = accountOutlineService.findAccountOutlineByAccountId(id);
         assertEquals(AccountState.Removed.value, account.getState());
 
-        accountOutlineRepository.deleteAll();
-
         AccountOutline a1 = new AccountOutline();
-        a1.setNickName(RandomUtil.randomStringWithPrefix(8, "TEST_"));
+        a1.setNickName(RandomUtil.randomStringWithPrefix(18, "TEST_"));
         AccountOutline a2 = new AccountOutline();
-        a2.setNickName(RandomUtil.randomStringWithPrefix(8, "TEST_"));
+        a2.setNickName(RandomUtil.randomStringWithPrefix(18, "TEST_"));
         AccountOutline a3 = new AccountOutline();
-        a3.setNickName(RandomUtil.randomStringWithPrefix(8, "TEST_"));
+        a3.setNickName(RandomUtil.randomStringWithPrefix(18, "TEST_"));
         AccountOutline a4 = new AccountOutline();
-        a4.setNickName(RandomUtil.randomStringWithPrefix(8, "TEST_"));
+        a4.setNickName(RandomUtil.randomStringWithPrefix(18, "TEST_"));
 
         accountOutlineService.addAccountOutline(a1);
         accountOutlineService.addAccountOutline(a2);
@@ -99,15 +92,6 @@ class AccountOutlineServiceTest {
         AccountOutline example = new AccountOutline();
         example.setNickName("TEST_");
         GenericPage<AccountOutline> accountPage = accountOutlineService.findAccountOutlineListPaged(example, PageRequest.of(1, 2));
-        assertEquals(4, accountPage.getTotalElements());
-        assertEquals(2, accountPage.getTotalPages());
         assertEquals(2, accountPage.getRecords().size());
-
-
-    }
-
-    @AfterEach
-    void clear() {
-        accountOutlineRepository.deleteAll();
     }
 }

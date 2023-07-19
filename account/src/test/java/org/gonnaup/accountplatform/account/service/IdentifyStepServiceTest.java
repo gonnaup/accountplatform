@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Random;
@@ -59,28 +58,24 @@ class IdentifyStepServiceTest {
     }
 
     @Test
-    @Transactional
     void nameExists() {
         IdentifyStep identifyStep = insertRandomStep();
         assertTrue(identifyStepService.nameExists(identifyStep.getIdentifyName()));
     }
 
     @Test
-    @Transactional
     void findById() {
         IdentifyStep identifyStep = insertRandomStep();
         assertNotNull(identifyStepService.findById(identifyStep.getId()));
     }
 
     @Test
-    @Transactional
     void findByName() {
         IdentifyStep identifyStep = insertRandomStep();
         assertNotNull(identifyStepService.findByName(identifyStep.getIdentifyName()));
     }
 
     @Test
-    @Transactional
     void findIdentifyStepsPageable() {
         insertRandomStep();
         insertRandomStep();
@@ -100,14 +95,12 @@ class IdentifyStepServiceTest {
     }
 
     @Test
-    @Transactional
     void addIdentifyStep() {
         IdentifyStep identifyStep = insertRandomStep();
         Assertions.assertNotNull(identifyStepService.findById(identifyStep.getId()));
     }
 
     @Test
-    @Transactional
     void updateIdentifyStep() {
         IdentifyStep identifyStep = insertRandomStep();
         String modifyName = UUID.randomUUID().toString();
@@ -124,7 +117,6 @@ class IdentifyStepServiceTest {
     }
 
     @Test
-    @Transactional
     void deleteIdentifyStep() {
         IdentifyStep identifyStep = insertRandomStep();
         IdentifyStep beforeDel = identifyStepService.deleteIdentifyStep(identifyStep.getId());
@@ -133,7 +125,6 @@ class IdentifyStepServiceTest {
     }
 
     @Test
-    @Transactional
     void nextStep() {
         IdentifyStep identifyStep = insertRandomStep();
         for (int i = 0; i < 5; i++) {
@@ -143,7 +134,6 @@ class IdentifyStepServiceTest {
     }
 
     @Test
-    @Transactional
     void idExists() {
         IdentifyStep identifyStep = insertRandomStep();
         assertTrue(identifyStepService.idExists(identifyStep.getId()));

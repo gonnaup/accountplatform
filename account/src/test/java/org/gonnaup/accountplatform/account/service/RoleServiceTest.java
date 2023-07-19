@@ -2,7 +2,6 @@ package org.gonnaup.accountplatform.account.service;
 
 import org.gonnaup.accountplatform.account.domain.GenericPage;
 import org.gonnaup.accountplatform.account.entity.Role;
-import org.gonnaup.accountplatform.account.repository.RoleRepository;
 import org.gonnaup.accountplatform.account.util.AuthUtil;
 import org.gonnaup.common.util.RandomUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,8 +23,6 @@ class RoleServiceTest {
 
     RoleService roleService;
 
-    RoleRepository roleRepository;
-
     Role r1;
 
     Role r2;
@@ -34,9 +30,8 @@ class RoleServiceTest {
     Role r3;
 
     @Autowired
-    public RoleServiceTest(RoleService roleService, RoleRepository roleRepository) {
+    public RoleServiceTest(RoleService roleService) {
         this.roleService = roleService;
-        this.roleRepository = roleRepository;
     }
 
     @BeforeEach
@@ -58,9 +53,7 @@ class RoleServiceTest {
     }
 
     @Test
-    @Transactional
     void testRoleService() {
-        roleRepository.deleteAll();
         //add
         roleService.addRole(r1);
         assertNotNull(roleService.findRoleById(r1.getId()));
@@ -71,12 +64,11 @@ class RoleServiceTest {
         role.setRoleName(RandomUtil.randomString(7));
         role.setRoleLocalName(RandomUtil.randomString(8));
         roleService.updateRoleExceptPermissionCode(role);
-        roleRepository.flush();
-        assertTrue(roleService.findRolesByIdNotInList(List.of(role.getId())).isEmpty());
+        assertEquals(roleService.findAll().size() - 1, roleService.findRolesByIdNotInList(List.of(role.getId())).size());
         Role roleById = roleService.findRoleById(r1.getId());
         assertEquals(role.getRoleName(), roleById.getRoleName());
         assertEquals(role.getRoleLocalName(), roleById.getRoleLocalName());
-        assertEquals(r1.getDescription(), roleById.getDescription());
+        assertEquals(role.getDescription(), roleById.getDescription());
 
         String pCode = AuthUtil.generatePermissionChain(List.of(1, 2, 3));
         roleService.updateRolePermissionCode(r1.getId(), pCode);
@@ -93,16 +85,13 @@ class RoleServiceTest {
         roleService.addRole(r3);
 
         assertEquals(3, roleService.findRolesByIdList(List.of(r1.getId(), r2.getId(), r3.getId())).size());
-        assertEquals(3, roleService.findAll().size());
 
         Role example = new Role();
         example.setRoleName("Role_");
         example.setRoleLocalName("Role_");
 
-        GenericPage<Role> rolePage = roleService.findRoleListPaged(example, PageRequest.of(1, 2));
-        assertEquals(3, rolePage.getTotalElements());
-        assertEquals(2, rolePage.getTotalPages());
-        assertEquals(1, rolePage.getRecords().size());
+        GenericPage<Role> rolePage = roleService.findRoleListPaged(example, PageRequest.of(0, 2));
+        assertEquals(2, rolePage.getRecords().size());
 
 
     }

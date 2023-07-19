@@ -94,6 +94,7 @@ public class RoleServiceImpl implements RoleService {
      * @return 更新数据条数
      */
     @Override
+    @Transactional
     public int updateRolePermissionCode(Integer roleId, String permissionCode) {
         int count = roleRepository.updatePermissionCodeOfRole(roleId, permissionCode, LocalDateTime.now());
         if (count > 0) {

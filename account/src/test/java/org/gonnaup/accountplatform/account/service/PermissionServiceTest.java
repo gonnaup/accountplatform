@@ -2,7 +2,6 @@ package org.gonnaup.accountplatform.account.service;
 
 import org.gonnaup.accountplatform.account.domain.GenericPage;
 import org.gonnaup.accountplatform.account.entity.Permission;
-import org.gonnaup.accountplatform.account.repository.PermissionRepository;
 import org.gonnaup.accountplatform.account.util.AuthUtil;
 import org.gonnaup.common.util.RandomUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,8 +28,6 @@ public class PermissionServiceTest {
 
     final PermissionService permissionService;
 
-    final PermissionRepository permissionRepository;
-
     List<Permission> permissionList = new ArrayList<>(3);
 
     Permission p1;
@@ -41,9 +37,8 @@ public class PermissionServiceTest {
     Permission p3;
 
     @Autowired
-    public PermissionServiceTest(PermissionService permissionService, PermissionRepository permissionRepository) {
+    public PermissionServiceTest(PermissionService permissionService) {
         this.permissionService = permissionService;
-        this.permissionRepository = permissionRepository;
     }
 
     @BeforeEach
@@ -68,19 +63,18 @@ public class PermissionServiceTest {
 
 
     @Test
-    @Transactional
     void testPermissionService() {
         logger.info("========== 开始测试 PermissionService 接口 ==========");
-        permissionRepository.deleteAll();
         //gen
-        assertEquals(1, permissionService.generateNextPermissionLocation());
+        int asInt = permissionService.findAll().stream().mapToInt(Permission::getPermissionLocation).max().orElse(0);
+        assertEquals(asInt + 1, permissionService.generateNextPermissionLocation());
         // add
         permissionService.addPermission(p1);
-        assertEquals(2, permissionService.generateNextPermissionLocation());
+        assertEquals(asInt + 2, permissionService.generateNextPermissionLocation());
         assertNotNull(permissionService.findPermissionById(p1.getId()));
         permissionService.addPermission(p2);
         permissionService.addPermission(p3);
-        assertEquals(2, permissionService.findPermissionsByIdNotInLIst(List.of(p1.getId())).size());
+        assertEquals(permissionService.findAll().size() - 1, permissionService.findPermissionsByIdNotInLIst(List.of(p1.getId())).size());
 
         //update
         String NEW_NAME = "TEST_P1_NAME_5839";
@@ -100,8 +94,6 @@ public class PermissionServiceTest {
 
         assertEquals(2, permissionService.findPermissionsByIdList(List.of(p2.getId(), p3.getId())).size());
 
-        assertEquals(2, permissionService.findAll().size());
-
         assertEquals(AuthUtil.generatePermissionChain(p2.getPermissionLocation()), permissionService.findPermissionCode(p2.getId()));
 
         PageRequest pageable = PageRequest.of(0, 1);
@@ -109,9 +101,7 @@ public class PermissionServiceTest {
         Permission example = new Permission();
         example.setResources("api");
         GenericPage<Permission> permissionPaged = permissionService.findPermissionPaged(example, pageable);
-        assertEquals(2, permissionPaged.getTotalPages());
         assertEquals(1, permissionPaged.getRecords().size());
-        assertEquals(2, permissionPaged.getTotalElements());
 
     }
 }

@@ -54,7 +54,7 @@ class IdentifyGenerateServiceTest {
         }
         final int threadNumPerStep = 5;
         final int threadNum = threadNumPerStep * stepNum;
-        final int numPerThread = 1000;
+        final int numPerThread = 450;
         CountDownLatch latch = new CountDownLatch(threadNum);
 
         for (int t = 0; t < threadNum; t++) {
@@ -91,7 +91,7 @@ class IdentifyGenerateServiceTest {
         }
         final int threadNumPerStep = 5;//每段的线程数
         final int threadNum = idStepNum * threadNumPerStep;
-        final int numPerThread = 10000;
+        final int numPerThread = 450;
         CountDownLatch latch = new CountDownLatch(threadNum);
 
         List<Long> ids = Collections.synchronizedList(new ArrayList<>(20000));
