@@ -31,6 +31,26 @@ public class AccountAuthentication extends TimedEntity {
     @Column(length = 200)
     private String credential;
 
+    public AccountAuthentication() {
+    }
+
+    /**
+     * 静态创建对象方法
+     *
+     * @param accountId  账号ID，不能为null
+     * @param credential 凭证，不能为null
+     * @return {@link AccountAuthentication}
+     * @throws NullPointerException 如果存在null值参数
+     */
+    public static AccountAuthentication of(Long accountId, String credential) {
+        Objects.requireNonNull(accountId);
+        Objects.requireNonNull(credential);
+        AccountAuthentication accountAuthentication = new AccountAuthentication();
+        accountAuthentication.accountId = accountId;
+        accountAuthentication.credential = credential;
+        return accountAuthentication;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", AccountAuthentication.class.getSimpleName() + "[", "]")
