@@ -6,7 +6,7 @@ spring:
   datasource:
     username: gonnaup
     password: 123456
-    url: jdbc:mysql://gonnaup.com/accountplatformtest?useSSL=false
+    url: jdbc:mysql://gonnaup.org/accountplatformtest?useSSL=false
     hikari:
       maximum-pool-size: 8
   jpa:
@@ -18,7 +18,7 @@ spring:
       repositories:
         enabled: false
       database: 1
-      host: gonnaup.com
+      host: gonnaup.org
       password: 123456
   cache:
     type: REDIS

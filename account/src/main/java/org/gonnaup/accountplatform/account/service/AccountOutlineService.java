@@ -139,7 +139,6 @@ public interface AccountOutlineService {
      * @param id 帐号Id
      * @return 权限码
      * <p>
-     * TODO test
      */
     String calculatePermissionCode(Long id);
 
@@ -147,7 +146,6 @@ public interface AccountOutlineService {
      * 清除账户权限码缓存
      *
      * @param id 帐号Id
-     *                                                                                           TODO test
      */
     void clearPermissionCodeCache(Long id);
 
